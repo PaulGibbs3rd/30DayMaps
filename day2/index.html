@@ -6,23 +6,36 @@
     <title>Location History Map</title>
     <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
     <style>
-        html, body, #viewDiv {
+        html, body, #viewDiv, #timeSliderDiv {
             height: 100%;
             width: 100%;
             margin: 0;
             padding: 0;
+        }
+
+        #timeSliderDiv {
+            position: absolute;
+            bottom: 10px;
+            left: 20px;
+            width: 90%;
+            background-color: white;
+            padding: 10px;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+            z-index: 99;
         }
     </style>
     <script src="https://js.arcgis.com/4.30/"></script>
 </head>
 <body>
     <div id="viewDiv"></div>
+    <div id="timeSliderDiv"></div>
     <script>
         require([
             "esri/Map",
             "esri/views/MapView",
-            "esri/layers/GeoJSONLayer"
-        ], function(Map, MapView, GeoJSONLayer) {
+            "esri/layers/GeoJSONLayer",
+            "esri/widgets/TimeSlider"
+        ], function(Map, MapView, GeoJSONLayer, TimeSlider) {
 
             // URL to point GeoJSON file hosted in the repository
             const pointLayerUrl = "https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day2/LocationHistor_FeaturesToJSO.geojson";
@@ -45,6 +58,10 @@
                             color: "white"
                         }
                     }
+                },
+                timeInfo: {
+                    startField: "startDate",  // Replace with the correct start date field in your GeoJSON
+                    endField: "endDate"       // Replace with the correct end date field in your GeoJSON
                 }
             });
 
@@ -58,6 +75,10 @@
                         color: "blue",
                         width: 2
                     }
+                },
+                timeInfo: {
+                    startField: "startDate",  // Replace with the correct start date field in your GeoJSON
+                    endField: "endDate"       // Replace with the correct end date field in your GeoJSON
                 }
             });
 
@@ -73,6 +94,28 @@
                 map: map,
                 center: [-100.33, 25.69], // Adjust center coordinates as per your data's location
                 zoom: 5
+            });
+
+            // Add the TimeSlider widget
+            const timeSlider = new TimeSlider({
+                container: "timeSliderDiv",
+                view: view,
+                timeVisible: true,  // Shows the time stamps on the time slider
+                stops: {
+                    interval: {
+                        value: 1,
+                        unit: "days"
+                    }
+                }
+            });
+
+            // Wait until the view is ready to set the time extent
+            view.whenLayerView(pointLayer).then(function() {
+                pointLayer.when(() => {
+                    const fullTimeExtent = pointLayer.timeInfo.fullTimeExtent;
+                    timeSlider.fullTimeExtent = fullTimeExtent;
+                    timeSlider.values = [fullTimeExtent.start, fullTimeExtent.end];
+                });
             });
         });
     </script>
