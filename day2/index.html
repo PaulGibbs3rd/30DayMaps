@@ -52,25 +52,65 @@
         require([
             "esri/Map",
             "esri/views/MapView",
-            "esri/layers/GeoJSONLayer",
+            "esri/layers/FeatureLayer",
             "esri/widgets/TimeSlider",
             "esri/widgets/Expand",
             "esri/widgets/Legend",
             "esri/widgets/TimeZoneLabel"
-        ], function(Map, MapView, GeoJSONLayer, TimeSlider, Expand, Legend, TimeZoneLabel) {
+        ], function(Map, MapView, FeatureLayer, TimeSlider, Expand, Legend, TimeZoneLabel) {
 
-            // URL to point GeoJSON file hosted in the repository
-            const pointLayerUrl = "https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day2/LocationHistor_FeaturesToJSO.geojson";
-
-            // URL to polyline GeoJSON file hosted in the repository
-            const polylineLayerUrl = "https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day2/LocationHistoryPolyline_FeaturesToJSO.geojson";
-
-            // GeoJSON layer for Points with unique value renderer
-            const pointLayer = new GeoJSONLayer({
-                url: pointLayerUrl,
+            // Define client-side FeatureLayer for Points
+            const pointLayer = new FeatureLayer({
+                source: [
+                    {
+                        geometry: {
+                            type: "point",
+                            longitude: -100.33,
+                            latitude: 25.69
+                        },
+                        attributes: {
+                            ObjectID: 1,
+                            type: "Start",
+                            startDate: new Date(2022, 0, 1),
+                            endDate: new Date(2022, 0, 2)
+                        }
+                    },
+                    {
+                        geometry: {
+                            type: "point",
+                            longitude: -100.35,
+                            latitude: 25.70
+                        },
+                        attributes: {
+                            ObjectID: 2,
+                            type: "End",
+                            startDate: new Date(2022, 0, 3),
+                            endDate: new Date(2022, 0, 4)
+                        }
+                    }
+                ],
+                objectIdField: "ObjectID",
+                fields: [
+                    {
+                        name: "ObjectID",
+                        type: "oid"
+                    },
+                    {
+                        name: "type",
+                        type: "string"
+                    },
+                    {
+                        name: "startDate",
+                        type: "date"
+                    },
+                    {
+                        name: "endDate",
+                        type: "date"
+                    }
+                ],
                 renderer: {
                     type: "unique-value",
-                    field: "type",  // Unique value field for points
+                    field: "type",
                     uniqueValueInfos: [
                         {
                             value: "Start",
@@ -102,22 +142,53 @@
                         }
                     ]
                 },
-                timeInfo: {
-                    startField: "startDate",  // Replace with the correct start date field in your GeoJSON
-                    endField: "endDate"       // Replace with the correct end date field in your GeoJSON
-                },
                 popupTemplate: {
                     title: "Location Point",
                     content: "<b>Type:</b> {type}<br><b>Start Date:</b> {startDate}<br><b>End Date:</b> {endDate}"
                 }
             });
 
-            // GeoJSON layer for Polylines with unique value renderer
-            const polylineLayer = new GeoJSONLayer({
-                url: polylineLayerUrl,
+            // Define client-side FeatureLayer for Polylines
+            const polylineLayer = new FeatureLayer({
+                source: [
+                    {
+                        geometry: {
+                            type: "polyline",
+                            paths: [
+                                [-100.33, 25.69],
+                                [-100.35, 25.70]
+                            ]
+                        },
+                        attributes: {
+                            ObjectID: 1,
+                            type_change: "Move",
+                            startDate: new Date(2022, 0, 1),
+                            endDate: new Date(2022, 0, 2)
+                        }
+                    }
+                ],
+                objectIdField: "ObjectID",
+                fields: [
+                    {
+                        name: "ObjectID",
+                        type: "oid"
+                    },
+                    {
+                        name: "type_change",
+                        type: "string"
+                    },
+                    {
+                        name: "startDate",
+                        type: "date"
+                    },
+                    {
+                        name: "endDate",
+                        type: "date"
+                    }
+                ],
                 renderer: {
                     type: "unique-value",
-                    field: "type_change",  // Unique value field for polylines
+                    field: "type_change",
                     uniqueValueInfos: [
                         {
                             value: "Move",
@@ -127,21 +198,8 @@
                                 width: 2
                             },
                             label: "Movement Path"
-                        },
-                        {
-                            value: "Stop",
-                            symbol: {
-                                type: "simple-line",
-                                color: "orange",
-                                width: 2
-                            },
-                            label: "Stop Path"
                         }
                     ]
-                },
-                timeInfo: {
-                    startField: "startDate",  // Replace with the correct start date field in your GeoJSON
-                    endField: "endDate"       // Replace with the correct end date field in your GeoJSON
                 },
                 popupTemplate: {
                     title: "Movement Path",
@@ -168,40 +226,18 @@
                 container: "timeSlider",
                 view: view,
                 timeVisible: true, // show the time stamps on the timeslider
-                loop: true
-            });
-
-            // Wait until the view is ready to set the time extent
-            view.whenLayerView(pointLayer).then(function() {
-                pointLayer.when(() => {
-                    const fullTimeExtent = {
-                        start: new Date(2022, 0, 1),
-                        end: new Date(2023, 0, 1)
-                    };
-                    timeSlider.fullTimeExtent = fullTimeExtent;
-                    timeSlider.stops = {
-                        interval: {
-                            value: 1,
-                            unit: "days"
-                        }
-                    };
-                    timeSlider.values = [new Date(2022, 0, 1), new Date(2022, 6, 1)];
-                });
-            }).catch((error) => {
-                console.error("Failed to load point layer view:", error);
-            });
-
-            // Load GeoJSON layers and add error handling
-            pointLayer.load().then(() => {
-                console.log("Point Layer Loaded");
-            }).catch((error) => {
-                console.error("Failed to load point layer:", error);
-            });
-
-            polylineLayer.load().then(() => {
-                console.log("Polyline Layer Loaded");
-            }).catch((error) => {
-                console.error("Failed to load polyline layer:", error);
+                loop: true,
+                fullTimeExtent: {
+                    start: new Date(2022, 0, 1),
+                    end: new Date(2023, 0, 1)
+                },
+                stops: {
+                    interval: {
+                        value: 1,
+                        unit: "days"
+                    }
+                },
+                values: [new Date(2022, 0, 1), new Date(2022, 6, 1)]
             });
 
             // TimeZoneLabel lets users know what the time zone of the view is.
