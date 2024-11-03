@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Day 2 Map with Time Slider</title>
+    <title>Day 2 Map with Custom Symbology</title>
     <link
       rel="stylesheet"
       href="https://js.arcgis.com/4.28/esri/themes/light/main.css"
@@ -25,10 +25,8 @@
       require([
         "esri/Map",
         "esri/views/MapView",
-        "esri/layers/GeoJSONLayer",
-        "esri/widgets/TimeSlider",
-        "esri/TimeExtent",
-      ], function (Map, MapView, GeoJSONLayer, TimeSlider, TimeExtent) {
+        "esri/layers/GeoJSONLayer"
+      ], function (Map, MapView, GeoJSONLayer) {
         // Create the map
         var map = new Map({
           basemap: "streets-navigation-vector"
@@ -46,69 +44,91 @@
         var pointGeoJsonUrl = "https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day2/LocationHistor_FeaturesToJSO.geojson";
         var polylineGeoJsonUrl = "https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day2/LocationHistoryPolyline_FeaturesToJSO.geojson";
 
-        // Create GeoJSONLayers
+        // Create GeoJSONLayers with custom renderer
         var pointLayer = new GeoJSONLayer({
           url: pointGeoJsonUrl,
           title: "Point Location History",
-          timeInfo: {
-            startField: "time", // Assuming a 'time' field exists in GeoJSON
-            interval: {
-              unit: "days",
-              value: 1
-            }
+          renderer: {
+            type: "unique-value",
+            field: "type", // Field for symbology
+            uniqueValueInfos: [
+              {
+                value: "cycling",
+                symbol: {
+                  type: "simple-marker",
+                  color: "green",
+                  size: "8px",
+                  outline: {
+                    color: "white",
+                    width: 1
+                  }
+                }
+              },
+              {
+                value: "walking",
+                symbol: {
+                  type: "simple-marker",
+                  color: "blue",
+                  size: "8px",
+                  outline: {
+                    color: "white",
+                    width: 1
+                  }
+                }
+              },
+              {
+                value: "driving",
+                symbol: {
+                  type: "simple-marker",
+                  color: "red",
+                  size: "8px",
+                  outline: {
+                    color: "white",
+                    width: 1
+                  }
+                }
+              }
+            ]
           }
         });
 
         var polylineLayer = new GeoJSONLayer({
           url: polylineGeoJsonUrl,
           title: "Polyline Location History",
-          timeInfo: {
-            startField: "time", // Assuming a 'time' field exists in GeoJSON
-            interval: {
-              unit: "days",
-              value: 1
-            }
+          renderer: {
+            type: "unique-value",
+            field: "type_change", // Field for symbology
+            uniqueValueInfos: [
+              {
+                value: "cycling to walking",
+                symbol: {
+                  type: "simple-line",
+                  color: "orange",
+                  width: 2
+                }
+              },
+              {
+                value: "driving to walking",
+                symbol: {
+                  type: "simple-line",
+                  color: "purple",
+                  width: 2
+                }
+              },
+              {
+                value: "walking to cycling",
+                symbol: {
+                  type: "simple-line",
+                  color: "green",
+                  width: 2
+                }
+              }
+            ]
           }
         });
 
         // Add the GeoJSON layers to the map
         map.addMany([pointLayer, polylineLayer]);
-
-        // TimeSlider widget
-        view.when(function () {
-          var timeSlider = new TimeSlider({
-            container: "viewDiv",
-            view: view,
-            mode: "time-window",
-            playRate: 2000, // milliseconds
-            timeVisible: true,
-            loop: true,
-          });
-
-          // Set time slider range manually after features are loaded
-          function updateTimeExtent(layer) {
-            layer.queryFeatures().then(function (featureSet) {
-              if (featureSet.features.length > 0) {
-                let times = featureSet.features.map(feature => new Date(feature.attributes.time));
-                let minTime = new Date(Math.min.apply(null, times));
-                let maxTime = new Date(Math.max.apply(null, times));
-                const fullTimeExtent = new TimeExtent({
-                  start: minTime,
-                  end: maxTime
-                });
-                timeSlider.fullTimeExtent = fullTimeExtent;
-                timeSlider.stops = {
-                  interval: layer.timeInfo.interval
-                };
-                view.ui.add(timeSlider, "bottom-left");
-              }
-            });
-          }
-
-          // Update time extent for both layers
-          pointLayer.when(() => updateTimeExtent(pointLayer));
-          polylineLayer.when(() => updateTimeExtent(polylineLayer));
-        });
       });
     </script>
   </body>
