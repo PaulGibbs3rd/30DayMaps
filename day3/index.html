@@ -51,6 +51,9 @@
         
         // URL for the Census counties feature layer (specify layer index 0 explicitly)
         var countiesFeatureLayerUrl = "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_Census_Counties/FeatureServer/0";
+        
+        // URL for the California cities feature layer
+        var californiaCitiesFeatureLayerUrl = "https://services7.arcgis.com/RZTs81UMZhbC5iCo/arcgis/rest/services/California_Cities_(Polygons)/FeatureServer/0";
 
         // Create the state boundary feature layer
         var statePolygonLayer = new FeatureLayer({
@@ -91,6 +94,27 @@
           popupTemplate: {
             title: "{NAME}",
             content: "County Name: {NAME}"
+          }
+        });
+
+        // Create the California cities feature layer
+        var californiaCitiesLayer = new FeatureLayer({
+          url: californiaCitiesFeatureLayerUrl,
+          title: "California Cities",
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-fill",
+              color: [0, 204, 102, 0.3], // Green fill with opacity
+              outline: {
+                color: "darkgreen",
+                width: 1
+              }
+            }
+          },
+          popupTemplate: {
+            title: "{CITY_NAME}",
+            content: "City Name: {CITY_NAME}"
           }
         });
 
@@ -135,7 +159,7 @@
         });
 
         // Add the layers to the map with points and lines on top of polygons
-        map.addMany([statePolygonLayer, countiesLayer, polylineLayer, pointLayer]);
+        map.addMany([statePolygonLayer, countiesLayer, californiaCitiesLayer, polylineLayer, pointLayer]);
 
         // Create a LayerList widget instance and add it to the view
         var layerList = new LayerList({
@@ -166,6 +190,12 @@
         countiesLayer.when(() => {
           countiesLayer.queryFeatures().then((featureSet) => {
             console.log("Counties Layer Features: ", featureSet.features.map(f => f.attributes));
+          });
+        });
+
+        californiaCitiesLayer.when(() => {
+          californiaCitiesLayer.queryFeatures().then((featureSet) => {
+            console.log("California Cities Layer Features: ", featureSet.features.map(f => f.attributes));
           });
         });
       });
