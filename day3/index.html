@@ -58,8 +58,8 @@
         // URL for the Oregon cities feature layer
         var oregonCitiesFeatureLayerUrl = "https://gis.odot.state.or.us/arcgis1006/rest/services/data_layers/city_limits/MapServer/0";
         
-        // URL for the Washington cities feature layer
-        var washingtonCitiesFeatureLayerUrl = "https://services2.arcgis.com/J4VMdGWiZXReffvo/arcgis/rest/services/CityLimits/FeatureServer";
+        // URL for the Washington cities feature layer (specify layer index 0 explicitly)
+        var washingtonCitiesFeatureLayerUrl = "https://services2.arcgis.com/J4VMdGWiZXReffvo/arcgis/rest/services/CityLimits/FeatureServer/0";
 
         // Create the state boundary feature layer
         var statePolygonLayer = new FeatureLayer({
@@ -216,48 +216,24 @@
 
         view.ui.add(layerList, "top-right");
 
-        // Debugging to log features for inspection
-        pointLayer.when(() => {
-          pointLayer.queryFeatures().then((featureSet) => {
-            console.log("Point Layer Features: ", featureSet.features.map(f => f.attributes));
+        // Debugging to log features for inspection and error handling
+        function logLayerStatus(layer, layerName) {
+          layer.when(() => {
+            layer.queryFeatures().then((featureSet) => {
+              console.log(layerName + " Features: ", featureSet.features.map(f => f.attributes));
+            });
+          }).catch((error) => {
+            console.error("Error loading " + layerName + " layer: ", error);
           });
-        });
+        }
 
-        polylineLayer.when(() => {
-          polylineLayer.queryFeatures().then((featureSet) => {
-            console.log("Polyline Layer Features: ", featureSet.features.map(f => f.attributes));
-          });
-        });
-
-        statePolygonLayer.when(() => {
-          statePolygonLayer.queryFeatures().then((featureSet) => {
-            console.log("State Polygon Layer Features: ", featureSet.features.map(f => f.attributes));
-          });
-        });
-
-        countiesLayer.when(() => {
-          countiesLayer.queryFeatures().then((featureSet) => {
-            console.log("Counties Layer Features: ", featureSet.features.map(f => f.attributes));
-          });
-        });
-
-        californiaCitiesLayer.when(() => {
-          californiaCitiesLayer.queryFeatures().then((featureSet) => {
-            console.log("California Cities Layer Features: ", featureSet.features.map(f => f.attributes));
-          });
-        });
-
-        oregonCitiesLayer.when(() => {
-          oregonCitiesLayer.queryFeatures().then((featureSet) => {
-            console.log("Oregon Cities Layer Features: ", featureSet.features.map(f => f.attributes));
-          });
-        });
-
-        washingtonCitiesLayer.when(() => {
-          washingtonCitiesLayer.queryFeatures().then((featureSet) => {
-            console.log("Washington Cities Layer Features: ", featureSet.features.map(f => f.attributes));
-          });
-        });
+        logLayerStatus(pointLayer, "Point Layer");
+        logLayerStatus(polylineLayer, "Polyline Layer");
+        logLayerStatus(statePolygonLayer, "State Polygon Layer");
+        logLayerStatus(countiesLayer, "Counties Layer");
+        logLayerStatus(californiaCitiesLayer, "California Cities Layer");
+        logLayerStatus(oregonCitiesLayer, "Oregon Cities Layer");
+        logLayerStatus(washingtonCitiesLayer, "Washington Cities Layer");
       });
     </script>
   </body>
