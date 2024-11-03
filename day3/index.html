@@ -39,7 +39,7 @@
   <body>
     <div id="viewDiv"></div>
     <calcite-panel id="resultsPanel" style="position: absolute; top: 10px; left: 10px; z-index: 100;">
-      <h3 slot="header-content">City Point Count Summary</h3>
+      <h3 slot="header-content">Top 10 Cities by Point Count</h3>
       <calcite-table>
         <thead>
           <tr>
@@ -54,7 +54,8 @@
       </calcite-table>
     </calcite-panel>
     <script>
-      require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/layers/GeoJSONLayer", "esri/widgets/LayerList", "esri/rest/query"], function (Map, MapView, FeatureLayer, GeoJSONLayer, LayerList, query) { // Create the map
+      require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/layers/GeoJSONLayer", "esri/widgets/LayerList", "esri/rest/query"], function (Map, MapView, FeatureLayer, GeoJSONLayer, LayerList, query) {
+        // Create the map
         var map = new Map({
           basemap: "streets-navigation-vector"
         });
@@ -69,13 +70,6 @@
 
         // Define URLs for GeoJSON layers
         var pointGeoJsonUrl = "https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day2/LocationHistor_FeaturesToJSO.geojson";
-        var polylineGeoJsonUrl = "https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day2/LocationHistoryPolyline_FeaturesToJSO.geojson";
-        
-        // URL for the state boundaries feature layer
-        var stateFeatureLayerUrl = "https://services.arcgis.com/ue9rwulIoeLEI9bj/arcgis/rest/services/US_StateBoundaries/FeatureServer/0";
-        
-        // URL for the Census counties feature layer (specify layer index 0 explicitly)
-        var countiesFeatureLayerUrl = "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_Census_Counties/FeatureServer/0";
         
         // URL for the California cities feature layer
         var californiaCitiesFeatureLayerUrl = "https://services7.arcgis.com/RZTs81UMZhbC5iCo/arcgis/rest/services/California_Cities_(Polygons)/FeatureServer/0";
@@ -86,153 +80,32 @@
         // URL for the Washington cities feature layer (specify layer index 0 explicitly)
         var washingtonCitiesFeatureLayerUrl = "https://services2.arcgis.com/J4VMdGWiZXReffvo/arcgis/rest/services/CityLimits/FeatureServer/0";
 
-        // Create the state boundary feature layer
-        var statePolygonLayer = new FeatureLayer({
-          url: stateFeatureLayerUrl,
-          title: "State Boundaries",
-          renderer: {
-            type: "simple",
-            symbol: {
-              type: "simple-fill",
-              color: [51, 102, 255, 0.3], // Light blue fill with opacity
-              outline: {
-                color: "navy",
-                width: 1
-              }
-            }
-          },
-          popupTemplate: {
-            title: "{STATE_NAME}",
-            content: "State Name: {STATE_NAME}"
-          }
-        });
-
-        // Create the counties feature layer
-        var countiesLayer = new FeatureLayer({
-          url: countiesFeatureLayerUrl,
-          title: "Census Counties",
-          renderer: {
-            type: "simple",
-            symbol: {
-              type: "simple-fill",
-              color: [255, 255, 102, 0.3], // Yellow fill with opacity
-              outline: {
-                color: "gray",
-                width: 0.5
-              }
-            }
-          },
-          popupTemplate: {
-            title: "{NAME}",
-            content: "County Name: {NAME}"
-          }
-        });
-
         // Create the California cities feature layer
         var californiaCitiesLayer = new FeatureLayer({
           url: californiaCitiesFeatureLayerUrl,
           title: "California Cities",
-          renderer: {
-            type: "simple",
-            symbol: {
-              type: "simple-fill",
-              color: [0, 204, 102, 0.3], // Green fill with opacity
-              outline: {
-                color: "darkgreen",
-                width: 1
-              }
-            }
-          },
-          popupTemplate: {
-            title: "{CITY_NAME}",
-            content: "City Name: {CITY_NAME}"
-          }
         });
 
         // Create the Oregon cities feature layer
         var oregonCitiesLayer = new FeatureLayer({
           url: oregonCitiesFeatureLayerUrl,
           title: "Oregon Cities",
-          renderer: {
-            type: "simple",
-            symbol: {
-              type: "simple-fill",
-              color: [102, 153, 255, 0.3], // Light blue fill with opacity
-              outline: {
-                color: "blue",
-                width: 1
-              }
-            }
-          },
-          popupTemplate: {
-            title: "{CITY_NAME}",
-            content: "City Name: {CITY_NAME}"
-          }
         });
 
         // Create the Washington cities feature layer
         var washingtonCitiesLayer = new FeatureLayer({
           url: washingtonCitiesFeatureLayerUrl,
           title: "Washington Cities",
-          renderer: {
-            type: "simple",
-            symbol: {
-              type: "simple-fill",
-              color: [153, 51, 255, 0.3], // Purple fill with opacity
-              outline: {
-                color: "purple",
-                width: 1
-              }
-            }
-          },
-          popupTemplate: {
-            title: "{CITY_NAME}",
-            content: "City Name: {CITY_NAME}"
-          }
         });
 
-        // Create GeoJSONLayers with simple renderer and enable popups
+        // Create GeoJSONLayer for points
         var pointLayer = new GeoJSONLayer({
           url: pointGeoJsonUrl,
           title: "Point Location History",
-          renderer: {
-            type: "simple",
-            symbol: {
-              type: "simple-marker",
-              color: "blue",
-              size: "8px",
-              outline: {
-                color: "white",
-                width: 1
-              }
-            }
-          },
-          popupTemplate: {
-            title: "Point Feature",
-            content: "Type: {type}"
-          }
         });
 
-        var polylineLayer = new GeoJSONLayer({
-          url: polylineGeoJsonUrl,
-          title: "Polyline Location History",
-          renderer: {
-            type: "simple",
-            symbol: {
-              type: "simple-line",
-              color: "orange",
-              width: 2,
-              opacity: 0.5
-            }
-          },
-          popupTemplate: {
-            title: "Polyline Feature",
-            content: "Type Change: {type_change}"
-          }
-        });
-
-        // Add the layers to the map with points and lines on top of polygons
-        map.addMany([statePolygonLayer, countiesLayer, californiaCitiesLayer, oregonCitiesLayer, washingtonCitiesLayer, polylineLayer, pointLayer]);
+        // Add the layers to the map
+        map.addMany([californiaCitiesLayer, oregonCitiesLayer, washingtonCitiesLayer, pointLayer]);
 
         // Create a LayerList widget instance and add it to the view
         var layerList = new LayerList({
@@ -241,55 +114,58 @@
 
         view.ui.add(layerList, "top-right");
 
-        // Debugging to log features for inspection and error handling
-        function logLayerStatus(layer, layerName) {
-          layer.when(() => {
-            layer.queryFeatures().then((featureSet) => {
-              console.log(layerName + " Features: ", featureSet.features.map(f => f.attributes));
-            });
-          }).catch((error) => {
-            console.error("Error loading " + layerName + " layer: ", error);
-          });
-        }
-
-        logLayerStatus(pointLayer, "Point Layer");
-        logLayerStatus(polylineLayer, "Polyline Layer");
-        logLayerStatus(statePolygonLayer, "State Polygon Layer");
-        logLayerStatus(countiesLayer, "Counties Layer");
-        logLayerStatus(californiaCitiesLayer, "California Cities Layer");
-        logLayerStatus(oregonCitiesLayer, "Oregon Cities Layer");
-        logLayerStatus(washingtonCitiesLayer, "Washington Cities Layer");
-
         // Function to perform spatial queries to find points within each city
         function performSpatialQueries() {
           var cityLayers = [californiaCitiesLayer, oregonCitiesLayer, washingtonCitiesLayer];
-          cityLayers.forEach(function (cityLayer) {
+          var cityPointCounts = [];
+
+          var promises = cityLayers.map(function (cityLayer) {
             var queryOptions = {
               where: "1=1",
               returnGeometry: true,
-              outFields: ["*"]
+              outFields: ["*"],
             };
-            query.executeQueryJSON(cityLayer.url, queryOptions).then(function (cityFeatureSet) {
-              cityFeatureSet.features.forEach(function (cityFeature) {
+            return query.executeQueryJSON(cityLayer.url, queryOptions).then(function (cityFeatureSet) {
+              var cityPromises = cityFeatureSet.features.map(function (cityFeature) {
                 var cityGeometry = cityFeature.geometry;
-                var pointQuery = var pointQueryOptions = {
+                var pointQueryOptions = {
                   geometry: cityGeometry,
                   spatialRelationship: "intersects",
                   returnGeometry: false,
-                  outFields: ["*"]
+                  outFields: ["*"],
                 };
-                query.executeQueryJSON(pointLayer.url, pointQueryOptions).then(function (pointFeatureSet) {
+                return query.executeQueryJSON(pointLayer.url, pointQueryOptions).then(function (pointFeatureSet) {
                   var pointCount = pointFeatureSet.features.length;
-                  var tableBody = document.getElementById("tableBody");
-                  var row = document.createElement("tr");
                   var cityName = cityFeature.attributes["CITY_NAME"] || "Unknown City";
                   var countyName = cityFeature.attributes["COUNTY_NAME"] || "Unknown County";
                   var stateName = cityFeature.attributes["STATE_NAME"] || "Unknown State";
 
-                  row.innerHTML = "<td>" + cityName + "</td><td>" + countyName + "</td><td>" + stateName + "</td><td>" + pointCount + "</td>";
-                  tableBody.appendChild(row);
+                  cityPointCounts.push({
+                    city: cityName,
+                    county: countyName,
+                    state: stateName,
+                    count: pointCount,
+                  });
                 });
               });
+              return Promise.all(cityPromises);
+            });
+          });
+
+          Promise.all(promises).then(function () {
+            // Sort cityPointCounts by count in descending order and take the top 10
+            cityPointCounts.sort(function (a, b) {
+              return b.count - a.count;
+            });
+            var top10Cities = cityPointCounts.slice(0, 10);
+
+            // Populate the table with the top 10 cities
+            var tableBody = document.getElementById("tableBody");
+            tableBody.innerHTML = ""; // Clear any previous results
+            top10Cities.forEach(function (cityData) {
+              var row = document.createElement("tr");
+              row.innerHTML = "<td>" + cityData.city + "</td><td>" + cityData.county + "</td><td>" + cityData.state + "</td><td>" + cityData.count + "</td>";
+              tableBody.appendChild(row);
             });
           });
         }
