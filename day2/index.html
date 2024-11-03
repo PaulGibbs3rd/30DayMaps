@@ -85,20 +85,29 @@
             loop: true,
           });
 
-          // Set time slider range to match GeoJSONLayer time extent
-          view.whenLayerView(pointLayer).then(function (layerView) {
-            pointLayer.when(() => {
-              const fullTimeExtent = new TimeExtent({
-                start: pointLayer.timeInfo.fullTimeExtent.start,
-                end: pointLayer.timeInfo.fullTimeExtent.end,
-              });
-              timeSlider.fullTimeExtent = fullTimeExtent;
-              timeSlider.stops = {
-                interval: pointLayer.timeInfo.interval
-              };
-              view.ui.add(timeSlider, "bottom-left");
+          // Set time slider range manually after features are loaded
+          function updateTimeExtent(layer) {
+            layer.queryFeatures().then(function (featureSet) {
+              if (featureSet.features.length > 0) {
+                let times = featureSet.features.map(feature => new Date(feature.attributes.time));
+                let minTime = new Date(Math.min.apply(null, times));
+                let maxTime = new Date(Math.max.apply(null, times));
+                const fullTimeExtent = new TimeExtent({
+                  start: minTime,
+                  end: maxTime
+                });
+                timeSlider.fullTimeExtent = fullTimeExtent;
+                timeSlider.stops = {
+                  interval: layer.timeInfo.interval
+                };
+                view.ui.add(timeSlider, "bottom-left");
+              }
             });
-          });
+          }
+
+          // Update time extent for both layers
+          pointLayer.when(() => updateTimeExtent(pointLayer));
+          polylineLayer.when(() => updateTimeExtent(polylineLayer));
         });
       });
     </script>
