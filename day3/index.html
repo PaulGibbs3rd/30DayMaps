@@ -48,6 +48,9 @@
         
         // URL for the state boundaries feature layer
         var stateFeatureLayerUrl = "https://services.arcgis.com/ue9rwulIoeLEI9bj/arcgis/rest/services/US_StateBoundaries/FeatureServer/0";
+        
+        // URL for the Census counties feature layer
+        var countiesFeatureLayerUrl = "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_Census_Counties/FeatureServer";
 
         // Create the state boundary feature layer
         var statePolygonLayer = new FeatureLayer({
@@ -67,6 +70,27 @@
           popupTemplate: {
             title: "{STATE_NAME}",
             content: "State Name: {STATE_NAME}"
+          }
+        });
+
+        // Create the counties feature layer
+        var countiesLayer = new FeatureLayer({
+          url: countiesFeatureLayerUrl,
+          title: "Census Counties",
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-fill",
+              color: [255, 255, 102, 0.3], // Yellow fill with opacity
+              outline: {
+                color: "gray",
+                width: 0.5
+              }
+            }
+          },
+          popupTemplate: {
+            title: "{NAME}",
+            content: "County Name: {NAME}"
           }
         });
 
@@ -111,7 +135,7 @@
         });
 
         // Add the layers to the map with points and lines on top of polygons
-        map.addMany([statePolygonLayer, polylineLayer, pointLayer]);
+        map.addMany([statePolygonLayer, countiesLayer, polylineLayer, pointLayer]);
 
         // Create a LayerList widget instance and add it to the view
         var layerList = new LayerList({
@@ -136,6 +160,12 @@
         statePolygonLayer.when(() => {
           statePolygonLayer.queryFeatures().then((featureSet) => {
             console.log("State Polygon Layer Features: ", featureSet.features.map(f => f.attributes));
+          });
+        });
+
+        countiesLayer.when(() => {
+          countiesLayer.queryFeatures().then((featureSet) => {
+            console.log("Counties Layer Features: ", featureSet.features.map(f => f.attributes));
           });
         });
       });
