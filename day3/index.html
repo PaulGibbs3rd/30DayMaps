@@ -153,20 +153,27 @@
           });
 
           Promise.all(promises).then(function () {
-            // Sort cityPointCounts by count in descending order and take the top 10
-            cityPointCounts.sort(function (a, b) {
-              return b.count - a.count;
-            });
-            var top10Cities = cityPointCounts.slice(0, 10);
-
-            // Populate the table with the top 10 cities
+            // Ensure the table body exists before trying to populate it
             var tableBody = document.getElementById("tableBody");
-            tableBody.innerHTML = ""; // Clear any previous results
-            top10Cities.forEach(function (cityData) {
-              var row = document.createElement("tr");
-              row.innerHTML = "<td>" + cityData.city + "</td><td>" + cityData.county + "</td><td>" + cityData.state + "</td><td>" + cityData.count + "</td>";
-              tableBody.appendChild(row);
-            });
+            if (tableBody) {
+              // Sort cityPointCounts by count in descending order and take the top 10
+              cityPointCounts.sort(function (a, b) {
+                return b.count - a.count;
+              });
+              var top10Cities = cityPointCounts.slice(0, 10);
+
+              // Populate the table with the top 10 cities
+              tableBody.innerHTML = ""; // Clear any previous results
+              top10Cities.forEach(function (cityData) {
+                var row = document.createElement("tr");
+                row.innerHTML = "<td>" + cityData.city + "</td><td>" + cityData.county + "</td><td>" + cityData.state + "</td><td>" + cityData.count + "</td>";
+                tableBody.appendChild(row);
+              });
+            } else {
+              console.error("Table body element not found.");
+            }
+          }).catch(function (error) {
+            console.error("Error performing spatial queries: ", error);
           });
         }
 
