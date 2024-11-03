@@ -174,7 +174,10 @@
             // Wait until the view is ready to set the time extent
             view.whenLayerView(pointLayer).then(function() {
                 pointLayer.when(() => {
-                    const fullTimeExtent = pointLayer.timeInfo.fullTimeExtent.expandTo("hours");
+                    const fullTimeExtent = {
+                        start: new Date(2022, 0, 1),
+                        end: new Date(2023, 0, 1)
+                    };
                     timeSlider.fullTimeExtent = fullTimeExtent;
                     timeSlider.stops = {
                         interval: {
@@ -182,8 +185,23 @@
                             unit: "days"
                         }
                     };
-                    timeSlider.values = [fullTimeExtent.start, fullTimeExtent.end];
+                    timeSlider.values = [new Date(2022, 0, 1), new Date(2022, 6, 1)];
                 });
+            }).catch((error) => {
+                console.error("Failed to load point layer view:", error);
+            });
+
+            // Load GeoJSON layers and add error handling
+            pointLayer.load().then(() => {
+                console.log("Point Layer Loaded");
+            }).catch((error) => {
+                console.error("Failed to load point layer:", error);
+            });
+
+            polylineLayer.load().then(() => {
+                console.log("Polyline Layer Loaded");
+            }).catch((error) => {
+                console.error("Failed to load polyline layer:", error);
             });
 
             // TimeZoneLabel lets users know what the time zone of the view is.
