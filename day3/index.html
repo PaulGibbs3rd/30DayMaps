@@ -22,7 +22,7 @@
   <body>
     <div id="viewDiv"></div>
     <script>
-      require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/layers/GeoJSONLayer", "esri/widgets/LayerList", "esri/geometry/geometryEngine", "esri/rest/support/Query"], function (Map, MapView, FeatureLayer, GeoJSONLayer, LayerList, geometryEngine, Query) {
+      require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/layers/GeoJSONLayer", "esri/widgets/LayerList"], function (Map, MapView, FeatureLayer, GeoJSONLayer, LayerList) {
         // Create the map
         var map = new Map({
           basemap: "streets-navigation-vector"
@@ -51,7 +51,7 @@
           title: "Point Location History",
           popupTemplate: {
             title: "Point Information",
-            content: "Loading..."
+            content: "Coordinates: {x}, {y}"
           }
         });
 
@@ -106,48 +106,6 @@
         });
 
         view.ui.add(layerList, "top-right");
-
-        // Perform spatial join to calculate which state and county each point is in
-        view.whenLayerView(pointLayer).then(function(layerView) {
-          pointLayer.when(() => {
-            pointLayer.queryFeatures().then(function(pointFeatureSet) {
-              pointFeatureSet.features.forEach(function(pointFeature) {
-                var pointGeometry = pointFeature.geometry;
-
-                // Query state and county layers
-                var stateQuery = new Query({
-                  geometry: pointGeometry,
-                  spatialRelationship: "intersects",
-                  returnGeometry: false,
-                  outFields: ["STATE_NAME"]
-                });
-
-                var countyQuery = new Query({
-                  geometry: pointGeometry,
-                  spatialRelationship: "intersects",
-                  returnGeometry: false,
-                  outFields: ["NAME"]
-                });
-
-                statePolygonLayer.queryFeatures(stateQuery).then(function(stateFeatureSet) {
-                  countiesLayer.queryFeatures(countyQuery).then(function(countyFeatureSet) {
-                    var stateName = stateFeatureSet.features.length > 0 ? stateFeatureSet.features[0].attributes.STATE_NAME : "Unknown State";
-                    var countyName = countyFeatureSet.features.length > 0 ? countyFeatureSet.features[0].attributes.NAME : "Unknown County";
-
-                    // Update the popup content for each point
-                    pointFeature.popupTemplate = {
-                      title: "Point Information",
-                      content: "State: " + stateName + "<br>County: " + countyName
-                    };
-
-                    // Refresh the layer to reflect new popups
-                    layerView.refresh();
-                  });
-                });
-              });
-            });
-          });
-        });
       });
     </script>
   </body>
