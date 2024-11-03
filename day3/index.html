@@ -17,18 +17,55 @@
         height: 100%;
         width: 100%;
       }
+      #resultsTable {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: white;
+        padding: 10px;
+        border: 1px solid black;
+        z-index: 100;
+        max-height: 400px;
+        overflow: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      table, th, td {
+        border: 1px solid black;
+      }
+      th, td {
+        padding: 8px;
+        text-align: left;
+      }
     </style>
   </head>
   <body>
     <div id="viewDiv"></div>
+    <div id="resultsTable">
+      <table>
+        <thead>
+          <tr>
+            <th>City</th>
+            <th>County</th>
+            <th>State</th>
+            <th>Point Count</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+      </table>
+    </div>
     <script>
       require([
         "esri/Map",
         "esri/views/MapView",
         "esri/layers/FeatureLayer",
         "esri/layers/GeoJSONLayer",
-        "esri/widgets/LayerList"
-      ], function (Map, MapView, FeatureLayer, GeoJSONLayer, LayerList) {
+        "esri/widgets/LayerList",
+        "esri/tasks/support/Query"
+      ], function (Map, MapView, FeatureLayer, GeoJSONLayer, LayerList, Query) {
         // Create the map
         var map = new Map({
           basemap: "streets-navigation-vector"
@@ -234,6 +271,43 @@
         logLayerStatus(californiaCitiesLayer, "California Cities Layer");
         logLayerStatus(oregonCitiesLayer, "Oregon Cities Layer");
         logLayerStatus(washingtonCitiesLayer, "Washington Cities Layer");
+
+        // Function to perform spatial queries to find points within each city
+        function performSpatialQueries() {
+          var cityLayers = [californiaCitiesLayer, oregonCitiesLayer, washingtonCitiesLayer];
+          cityLayers.forEach(function (cityLayer) {
+            var query = cityLayer.createQuery();
+            query.returnGeometry = true;
+            query.outFields = ["*"];
+
+            cityLayer.queryFeatures(query).then(function (cityFeatureSet) {
+              cityFeatureSet.features.forEach(function (cityFeature) {
+                var cityGeometry = cityFeature.geometry;
+                var pointQuery = pointLayer.createQuery();
+                pointQuery.geometry = cityGeometry;
+                pointQuery.spatialRelationship = "intersects";
+                pointQuery.returnGeometry = false;
+
+                pointLayer.queryFeatures(pointQuery).then(function (pointFeatureSet) {
+                  var pointCount = pointFeatureSet.features.length;
+                  var tableBody = document.getElementById("tableBody");
+                  var row = document.createElement("tr");
+                  var cityName = cityFeature.attributes["CITY_NAME"] || "Unknown City";
+                  var countyName = cityFeature.attributes["COUNTY_NAME"] || "Unknown County";
+                  var stateName = cityFeature.attributes["STATE_NAME"] || "Unknown State";
+
+                  row.innerHTML = "<td>" + cityName + "</td><td>" + countyName + "</td><td>" + stateName + "</td><td>" + pointCount + "</td>";
+                  tableBody.appendChild(row);
+                });
+              });
+            });
+          });
+        }
+
+        // Wait until the point layer is loaded, then perform spatial queries
+        pointLayer.when(function () {
+          performSpatialQueries();
+        });
       });
     </script>
   </body>
