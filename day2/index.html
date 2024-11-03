@@ -109,38 +109,17 @@
                     }
                 ],
                 renderer: {
-                    type: "unique-value",
-                    field: "type",
-                    uniqueValueInfos: [
-                        {
-                            value: "Start",
-                            symbol: {
-                                type: "simple-marker",
-                                style: "circle",
-                                color: "green",
-                                size: 6,
-                                outline: {
-                                    width: 1,
-                                    color: "white"
-                                }
-                            },
-                            label: "Start Point"
-                        },
-                        {
-                            value: "End",
-                            symbol: {
-                                type: "simple-marker",
-                                style: "circle",
-                                color: "red",
-                                size: 6,
-                                outline: {
-                                    width: 1,
-                                    color: "white"
-                                }
-                            },
-                            label: "End Point"
+                    type: "simple",
+                    symbol: {
+                        type: "simple-marker",
+                        style: "circle",
+                        color: "blue",
+                        size: 6,
+                        outline: {
+                            width: 1,
+                            color: "white"
                         }
-                    ]
+                    }
                 },
                 popupTemplate: {
                     title: "Location Point",
@@ -187,19 +166,12 @@
                     }
                 ],
                 renderer: {
-                    type: "unique-value",
-                    field: "type_change",
-                    uniqueValueInfos: [
-                        {
-                            value: "Move",
-                            symbol: {
-                                type: "simple-line",
-                                color: "blue",
-                                width: 2
-                            },
-                            label: "Movement Path"
-                        }
-                    ]
+                    type: "simple",
+                    symbol: {
+                        type: "simple-line",
+                        color: "red",
+                        width: 2
+                    }
                 },
                 popupTemplate: {
                     title: "Movement Path",
