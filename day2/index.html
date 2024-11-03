@@ -43,42 +43,87 @@
             // URL to polyline GeoJSON file hosted in the repository
             const polylineLayerUrl = "https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day2/LocationHistoryPolyline_FeaturesToJSO.geojson";
 
-            // GeoJSON layer for Points
+            // GeoJSON layer for Points with unique value renderer
             const pointLayer = new GeoJSONLayer({
                 url: pointLayerUrl,
                 renderer: {
-                    type: "simple",
-                    symbol: {
-                        type: "simple-marker",
-                        style: "circle",
-                        color: "red",
-                        size: 6,
-                        outline: {
-                            width: 1,
-                            color: "white"
+                    type: "unique-value",
+                    field: "type",  // Unique value field for points
+                    uniqueValueInfos: [
+                        {
+                            value: "Start",
+                            symbol: {
+                                type: "simple-marker",
+                                style: "circle",
+                                color: "green",
+                                size: 6,
+                                outline: {
+                                    width: 1,
+                                    color: "white"
+                                }
+                            },
+                            label: "Start Point"
+                        },
+                        {
+                            value: "End",
+                            symbol: {
+                                type: "simple-marker",
+                                style: "circle",
+                                color: "red",
+                                size: 6,
+                                outline: {
+                                    width: 1,
+                                    color: "white"
+                                }
+                            },
+                            label: "End Point"
                         }
-                    }
+                    ]
                 },
                 timeInfo: {
                     startField: "startDate",  // Replace with the correct start date field in your GeoJSON
                     endField: "endDate"       // Replace with the correct end date field in your GeoJSON
+                },
+                popupTemplate: {
+                    title: "Location Point",
+                    content: "<b>Type:</b> {type}<br><b>Start Date:</b> {startDate}<br><b>End Date:</b> {endDate}"
                 }
             });
 
-            // GeoJSON layer for Polylines
+            // GeoJSON layer for Polylines with unique value renderer
             const polylineLayer = new GeoJSONLayer({
                 url: polylineLayerUrl,
                 renderer: {
-                    type: "simple",
-                    symbol: {
-                        type: "simple-line",
-                        color: "blue",
-                        width: 2
-                    }
+                    type: "unique-value",
+                    field: "type_change",  // Unique value field for polylines
+                    uniqueValueInfos: [
+                        {
+                            value: "Move",
+                            symbol: {
+                                type: "simple-line",
+                                color: "blue",
+                                width: 2
+                            },
+                            label: "Movement Path"
+                        },
+                        {
+                            value: "Stop",
+                            symbol: {
+                                type: "simple-line",
+                                color: "orange",
+                                width: 2
+                            },
+                            label: "Stop Path"
+                        }
+                    ]
                 },
                 timeInfo: {
                     startField: "startDate",  // Replace with the correct start date field in your GeoJSON
                     endField: "endDate"       // Replace with the correct end date field in your GeoJSON
+                },
+                popupTemplate: {
+                    title: "Movement Path",
+                    content: "<b>Type Change:</b> {type_change}<br><b>Start Date:</b> {startDate}<br><b>End Date:</b> {endDate}"
                 }
             });
 
