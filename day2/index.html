@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Day 2 Map with Custom Symbology</title>
+    <title>Day 2 Map with Simple Symbology</title>
     <link
       rel="stylesheet"
       href="https://js.arcgis.com/4.28/esri/themes/light/main.css"
@@ -44,156 +44,21 @@
         var pointGeoJsonUrl = "https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day2/LocationHistor_FeaturesToJSO.geojson";
         var polylineGeoJsonUrl = "https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day2/LocationHistoryPolyline_FeaturesToJSO.geojson";
 
-        // Create GeoJSONLayers with custom renderer
+        // Create GeoJSONLayers with simple renderer
         var pointLayer = new GeoJSONLayer({
           url: pointGeoJsonUrl,
           title: "Point Location History",
           renderer: {
-            type: "unique-value",
-            field: "type", // Field for symbology
-            defaultSymbol: {
+            type: "simple",
+            symbol: {
               type: "simple-marker",
-              color: "gray",
+              color: "blue",
               size: "8px",
               outline: {
                 color: "white",
                 width: 1
               }
-            },
-            uniqueValueInfos: [
-              {
-                value: "cycling",
-                symbol: {
-                  type: "simple-marker",
-                  color: "green",
-                  size: "10px",
-                  outline: {
-                    color: "white",
-                    width: 1
-                  }
-                }
-              },
-              {
-                value: "flying",
-                symbol: {
-                  type: "simple-marker",
-                  color: "skyblue",
-                  size: "10px",
-                  outline: {
-                    color: "white",
-                    width: 1
-                  }
-                }
-              },
-              {
-                value: "in bus",
-                symbol: {
-                  type: "simple-marker",
-                  color: "yellow",
-                  size: "10px",
-                  outline: {
-                    color: "white",
-                    width: 1
-                  }
-                }
-              },
-              {
-                value: "in passenger vehicle",
-                symbol: {
-                  type: "simple-marker",
-                  color: "orange",
-                  size: "10px",
-                  outline: {
-                    color: "white",
-                    width: 1
-                  }
-                }
-              },
-              {
-                value: "in subway",
-                symbol: {
-                  type: "simple-marker",
-                  color: "purple",
-                  size: "10px",
-                  outline: {
-                    color: "white",
-                    width: 1
-                  }
-                }
-              },
-              {
-                value: "in train",
-                symbol: {
-                  type: "simple-marker",
-                  color: "brown",
-                  size: "10px",
-                  outline: {
-                    color: "white",
-                    width: 1
-                  }
-                }
-              },
-              {
-                value: "in tram",
-                symbol: {
-                  type: "simple-marker",
-                  color: "pink",
-                  size: "10px",
-                  outline: {
-                    color: "white",
-                    width: 1
-                  }
-                }
-              },
-              {
-                value: "motorcycling",
-                symbol: {
-                  type: "simple-marker",
-                  color: "red",
-                  size: "10px",
-                  outline: {
-                    color: "white",
-                    width: 1
-                  }
-                }
-              },
-              {
-                value: "running",
-                symbol: {
-                  type: "simple-marker",
-                  color: "darkgreen",
-                  size: "10px",
-                  outline: {
-                    color: "white",
-                    width: 1
-                  }
-                }
-              },
-              {
-                value: "unknown",
-                symbol: {
-                  type: "simple-marker",
-                  color: "gray",
-                  size: "10px",
-                  outline: {
-                    color: "white",
-                    width: 1
-                  }
-                }
-              },
-              {
-                value: "walking",
-                symbol: {
-                  type: "simple-marker",
-                  color: "blue",
-                  size: "10px",
-                  outline: {
-                    color: "white",
-                    width: 1
-                  }
-                }
-              }
-            ]
+            }
           }
         });
 
@@ -201,39 +66,12 @@
           url: polylineGeoJsonUrl,
           title: "Polyline Location History",
           renderer: {
-            type: "unique-value",
-            field: "type_change", // Field for symbology
-            defaultSymbol: {
+            type: "simple",
+            symbol: {
               type: "simple-line",
-              color: "gray",
+              color: "orange",
               width: 2
-            },
-            uniqueValueInfos: [
-              {
-                value: "cycling to walking",
-                symbol: {
-                  type: "simple-line",
-                  color: "orange",
-                  width: 3
-                }
-              },
-              {
-                value: "driving to walking",
-                symbol: {
-                  type: "simple-line",
-                  color: "purple",
-                  width: 3
-                }
-              },
-              {
-                value: "walking to cycling",
-                symbol: {
-                  type: "simple-line",
-                  color: "green",
-                  width: 3
-                }
-              }
-            ]
+            }
           }
         });
 
