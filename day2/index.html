@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Location History Map</title>
+    <script type="module" src="https://js.arcgis.com/calcite-components/2.11.1/calcite.esm.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/2.11.1/calcite.css"/>
     <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.30/"></script>
     <style>
         html, body, #viewDiv, #timeSliderDiv {
             height: 100%;
@@ -23,19 +26,38 @@
             box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
             z-index: 99;
         }
+
+        #titleDiv {
+            padding: 10px;
+            font-weight: 36;
+            text-align: center;
+        }
+
+        #timeSlider {
+            position: absolute;
+            left: 5%;
+            right: 5%;
+            bottom: 20px;
+        }
     </style>
-    <script src="https://js.arcgis.com/4.30/"></script>
 </head>
 <body>
     <div id="viewDiv"></div>
-    <div id="timeSliderDiv"></div>
+    <div id="timeSlider"></div>
+    <div id="titleDiv" class="esri-widget">
+        <div id="titleText">Location History Overview</div>
+    </div>
+    <calcite-input-time-zone mode="name" id="timezone-picker"></calcite-input-time-zone>
     <script>
         require([
             "esri/Map",
             "esri/views/MapView",
             "esri/layers/GeoJSONLayer",
-            "esri/widgets/TimeSlider"
-        ], function(Map, MapView, GeoJSONLayer, TimeSlider) {
+            "esri/widgets/TimeSlider",
+            "esri/widgets/Expand",
+            "esri/widgets/Legend",
+            "esri/widgets/TimeZoneLabel"
+        ], function(Map, MapView, GeoJSONLayer, TimeSlider, Expand, Legend, TimeZoneLabel) {
 
             // URL to point GeoJSON file hosted in the repository
             const pointLayerUrl = "https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day2/LocationHistor_FeaturesToJSO.geojson";
@@ -143,25 +165,51 @@
 
             // Add the TimeSlider widget
             const timeSlider = new TimeSlider({
-                container: "timeSliderDiv",
+                container: "timeSlider",
                 view: view,
-                timeVisible: true,  // Shows the time stamps on the time slider
-                stops: {
-                    interval: {
-                        value: 1,
-                        unit: "days"
-                    }
-                }
+                timeVisible: true, // show the time stamps on the timeslider
+                loop: true
             });
 
             // Wait until the view is ready to set the time extent
             view.whenLayerView(pointLayer).then(function() {
                 pointLayer.when(() => {
-                    const fullTimeExtent = pointLayer.timeInfo.fullTimeExtent;
+                    const fullTimeExtent = pointLayer.timeInfo.fullTimeExtent.expandTo("hours");
                     timeSlider.fullTimeExtent = fullTimeExtent;
+                    timeSlider.stops = {
+                        interval: {
+                            value: 1,
+                            unit: "days"
+                        }
+                    };
                     timeSlider.values = [fullTimeExtent.start, fullTimeExtent.end];
                 });
             });
+
+            // TimeZoneLabel lets users know what the time zone of the view is.
+            view.ui.add(new TimeZoneLabel({ view: view }), "top-left");
+
+            // Calcite input time zone component allows users to pick from one of the IANA time zones
+            const timezonePicker = document.getElementById("timezone-picker");
+            view.ui.add("timezone-picker", "top-right");
+
+            // Change the map view's time zone when user picks a time zone from the component
+            timezonePicker.addEventListener("calciteInputTimeZoneChange", () => {
+                view.timeZone = timezonePicker.value;
+            });
+
+            // Add a legend to the view
+            const legend = new Legend({
+                view: view
+            });
+            const legendExpand = new Expand({
+                expandIcon: "legend",
+                expandTooltip: "Legend",
+                view: view,
+                content: legend,
+                expanded: false
+            });
+            view.ui.add(legendExpand, "top-left");
         });
     </script>
 </body>
