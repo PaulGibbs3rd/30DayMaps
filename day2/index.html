@@ -51,6 +51,15 @@
           renderer: {
             type: "unique-value",
             field: "type", // Field for symbology
+            defaultSymbol: {
+              type: "simple-marker",
+              color: "gray",
+              size: "6px",
+              outline: {
+                color: "white",
+                width: 1
+              }
+            },
             uniqueValueInfos: [
               {
                 value: "cycling",
@@ -98,6 +107,11 @@
           renderer: {
             type: "unique-value",
             field: "type_change", // Field for symbology
+            defaultSymbol: {
+              type: "simple-line",
+              color: "gray",
+              width: 1
+            },
             uniqueValueInfos: [
               {
                 value: "cycling to walking",
