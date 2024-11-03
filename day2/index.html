@@ -1,242 +1,106 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Location History Map</title>
-    <script type="module" src="https://js.arcgis.com/calcite-components/2.11.1/calcite.esm.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/2.11.1/calcite.css"/>
-    <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
-    <script src="https://js.arcgis.com/4.30/"></script>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Day 2 Map with Time Slider</title>
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.28/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.28/"></script>
     <style>
-        html, body, #viewDiv, #timeSliderDiv {
-            height: 100%;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-        #timeSliderDiv {
-            position: absolute;
-            bottom: 10px;
-            left: 20px;
-            width: 90%;
-            background-color: white;
-            padding: 10px;
-            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
-            z-index: 99;
-        }
-
-        #titleDiv {
-            padding: 10px;
-            font-weight: 36;
-            text-align: center;
-        }
-
-        #timeSlider {
-            position: absolute;
-            left: 5%;
-            right: 5%;
-            bottom: 20px;
-        }
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div id="viewDiv"></div>
-    <div id="timeSlider"></div>
-    <div id="titleDiv" class="esri-widget">
-        <div id="titleText">Location History Overview</div>
-    </div>
-    <calcite-input-time-zone mode="name" id="timezone-picker"></calcite-input-time-zone>
     <script>
-        require([
-            "esri/Map",
-            "esri/views/MapView",
-            "esri/layers/FeatureLayer",
-            "esri/widgets/TimeSlider",
-            "esri/widgets/Expand",
-            "esri/widgets/Legend",
-            "esri/widgets/TimeZoneLabel"
-        ], function(Map, MapView, FeatureLayer, TimeSlider, Expand, Legend, TimeZoneLabel) {
-
-            // Define client-side FeatureLayer for Points
-            const pointLayer = new FeatureLayer({
-                source: [
-                    {
-                        geometry: {
-                            type: "point",
-                            longitude: -100.33,
-                            latitude: 25.69
-                        },
-                        attributes: {
-                            ObjectID: 1,
-                            type: "Start",
-                            startDate: new Date(2022, 0, 1),
-                            endDate: new Date(2022, 0, 2)
-                        }
-                    },
-                    {
-                        geometry: {
-                            type: "point",
-                            longitude: -100.35,
-                            latitude: 25.70
-                        },
-                        attributes: {
-                            ObjectID: 2,
-                            type: "End",
-                            startDate: new Date(2022, 0, 3),
-                            endDate: new Date(2022, 0, 4)
-                        }
-                    }
-                ],
-                objectIdField: "ObjectID",
-                fields: [
-                    {
-                        name: "ObjectID",
-                        type: "oid"
-                    },
-                    {
-                        name: "type",
-                        type: "string"
-                    },
-                    {
-                        name: "startDate",
-                        type: "date"
-                    },
-                    {
-                        name: "endDate",
-                        type: "date"
-                    }
-                ],
-                renderer: {
-                    type: "simple",
-                    symbol: {
-                        type: "simple-marker",
-                        style: "circle",
-                        color: "blue",
-                        size: 6,
-                        outline: {
-                            width: 1,
-                            color: "white"
-                        }
-                    }
-                },
-                popupTemplate: {
-                    title: "Location Point",
-                    content: "<b>Type:</b> {type}<br><b>Start Date:</b> {startDate}<br><b>End Date:</b> {endDate}"
-                }
-            });
-
-            // Define client-side FeatureLayer for Polylines
-            const polylineLayer = new FeatureLayer({
-                source: [
-                    {
-                        geometry: {
-                            type: "polyline",
-                            paths: [
-                                [-100.33, 25.69],
-                                [-100.35, 25.70]
-                            ]
-                        },
-                        attributes: {
-                            ObjectID: 1,
-                            type_change: "Move",
-                            startDate: new Date(2022, 0, 1),
-                            endDate: new Date(2022, 0, 2)
-                        }
-                    }
-                ],
-                objectIdField: "ObjectID",
-                fields: [
-                    {
-                        name: "ObjectID",
-                        type: "oid"
-                    },
-                    {
-                        name: "type_change",
-                        type: "string"
-                    },
-                    {
-                        name: "startDate",
-                        type: "date"
-                    },
-                    {
-                        name: "endDate",
-                        type: "date"
-                    }
-                ],
-                renderer: {
-                    type: "simple",
-                    symbol: {
-                        type: "simple-line",
-                        color: "red",
-                        width: 2
-                    }
-                },
-                popupTemplate: {
-                    title: "Movement Path",
-                    content: "<b>Type Change:</b> {type_change}<br><b>Start Date:</b> {startDate}<br><b>End Date:</b> {endDate}"
-                }
-            });
-
-            // Create the map
-            const map = new Map({
-                basemap: "streets-navigation-vector",
-                layers: [pointLayer, polylineLayer]
-            });
-
-            // Create the view
-            const view = new MapView({
-                container: "viewDiv",
-                map: map,
-                center: [-100.33, 25.69], // Adjust center coordinates as per your data's location
-                zoom: 5
-            });
-
-            // Add the TimeSlider widget
-            const timeSlider = new TimeSlider({
-                container: "timeSlider",
-                view: view,
-                timeVisible: true, // show the time stamps on the timeslider
-                loop: true,
-                fullTimeExtent: {
-                    start: new Date(2022, 0, 1),
-                    end: new Date(2023, 0, 1)
-                },
-                stops: {
-                    interval: {
-                        value: 1,
-                        unit: "days"
-                    }
-                },
-                values: [new Date(2022, 0, 1), new Date(2022, 6, 1)]
-            });
-
-            // TimeZoneLabel lets users know what the time zone of the view is.
-            view.ui.add(new TimeZoneLabel({ view: view }), "top-left");
-
-            // Calcite input time zone component allows users to pick from one of the IANA time zones
-            const timezonePicker = document.getElementById("timezone-picker");
-            view.ui.add("timezone-picker", "top-right");
-
-            // Change the map view's time zone when user picks a time zone from the component
-            timezonePicker.addEventListener("calciteInputTimeZoneChange", () => {
-                view.timeZone = timezonePicker.value;
-            });
-
-            // Add a legend to the view
-            const legend = new Legend({
-                view: view
-            });
-            const legendExpand = new Expand({
-                expandIcon: "legend",
-                expandTooltip: "Legend",
-                view: view,
-                content: legend,
-                expanded: false
-            });
-            view.ui.add(legendExpand, "top-left");
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/GeoJSONLayer",
+        "esri/widgets/TimeSlider",
+        "esri/TimeExtent",
+      ], function (Map, MapView, GeoJSONLayer, TimeSlider, TimeExtent) {
+        // Create the map
+        var map = new Map({
+          basemap: "streets-navigation-vector"
         });
+
+        // Create the MapView
+        var view = new MapView({
+          container: "viewDiv",
+          map: map,
+          center: [-98.5795, 39.8283], // Center of the United States
+          zoom: 4
+        });
+
+        // Define URLs for GeoJSON layers
+        var pointGeoJsonUrl = "LocationHistor_FeaturesToJSO.geojson";
+        var polylineGeoJsonUrl = "LocationHistoryPolyline_FeaturesToJSO.geojson";
+
+        // Create GeoJSONLayers
+        var pointLayer = new GeoJSONLayer({
+          url: pointGeoJsonUrl,
+          title: "Point Location History",
+          timeInfo: {
+            startField: "time", // Assuming a 'time' field exists in GeoJSON
+            interval: {
+              unit: "days",
+              value: 1
+            }
+          }
+        });
+
+        var polylineLayer = new GeoJSONLayer({
+          url: polylineGeoJsonUrl,
+          title: "Polyline Location History",
+          timeInfo: {
+            startField: "time", // Assuming a 'time' field exists in GeoJSON
+            interval: {
+              unit: "days",
+              value: 1
+            }
+          }
+        });
+
+        // Add the GeoJSON layers to the map
+        map.addMany([pointLayer, polylineLayer]);
+
+        // TimeSlider widget
+        view.when(function () {
+          var timeSlider = new TimeSlider({
+            container: "viewDiv",
+            view: view,
+            mode: "time-window",
+            playRate: 2000, // milliseconds
+            timeVisible: true,
+            loop: true,
+          });
+
+          // Set time slider range to match GeoJSONLayer time extent
+          view.whenLayerView(pointLayer).then(function (layerView) {
+            pointLayer.when(() => {
+              const fullTimeExtent = new TimeExtent({
+                start: pointLayer.timeInfo.fullTimeExtent.start,
+                end: pointLayer.timeInfo.fullTimeExtent.end,
+              });
+              timeSlider.fullTimeExtent = fullTimeExtent;
+              timeSlider.stops = {
+                interval: pointLayer.timeInfo.interval
+              };
+              view.ui.add(timeSlider, "bottom-left");
+            });
+          });
+        });
+      });
     </script>
-</body>
+  </body>
 </html>
