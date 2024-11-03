@@ -22,13 +22,7 @@
   <body>
     <div id="viewDiv"></div>
     <script>
-      require([
-        "esri/Map",
-        "esri/views/MapView",
-        "esri/layers/FeatureLayer",
-        "esri/layers/GeoJSONLayer",
-        "esri/widgets/LayerList"
-      ], function (Map, MapView, FeatureLayer, GeoJSONLayer, LayerList) {
+      require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/layers/GeoJSONLayer", "esri/widgets/LayerList"], function (Map, MapView, FeatureLayer, GeoJSONLayer, LayerList) {
         // Create the map
         var map = new Map({
           basemap: "streets-navigation-vector"
@@ -49,7 +43,7 @@
         // URL for the state boundaries feature layer
         var stateFeatureLayerUrl = "https://services.arcgis.com/ue9rwulIoeLEI9bj/arcgis/rest/services/US_StateBoundaries/FeatureServer/0";
         
-        // URL for the Census counties feature layer (specify layer index 0 explicitly)
+        // URL for the Census counties feature layer
         var countiesFeatureLayerUrl = "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_Census_Counties/FeatureServer/0";
         
         // URL for the California cities feature layer
@@ -58,8 +52,48 @@
         // URL for the Oregon cities feature layer
         var oregonCitiesFeatureLayerUrl = "https://gis.odot.state.or.us/arcgis1006/rest/services/data_layers/city_limits/MapServer/0";
         
-        // URL for the Washington cities feature layer (specify layer index 0 explicitly)
+        // URL for the Washington cities feature layer
         var washingtonCitiesFeatureLayerUrl = "https://services2.arcgis.com/J4VMdGWiZXReffvo/arcgis/rest/services/CityLimits/FeatureServer/0";
+
+        // Create GeoJSONLayers with simple renderer and enable popups
+        var pointLayer = new GeoJSONLayer({
+          url: pointGeoJsonUrl,
+          title: "Point Location History",
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-marker",
+              color: "blue",
+              size: "8px",
+              outline: {
+                color: "white",
+                width: 1
+              }
+            }
+          },
+          popupTemplate: {
+            title: "Point Feature",
+            content: "Coordinates: {x}, {y}"
+          }
+        });
+
+        var polylineLayer = new GeoJSONLayer({
+          url: polylineGeoJsonUrl,
+          title: "Polyline Location History",
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-line",
+              color: "orange",
+              width: 2,
+              opacity: 0.5
+            }
+          },
+          popupTemplate: {
+            title: "Polyline Feature",
+            content: "Type Change: {type_change}"
+          }
+        });
 
         // Create the state boundary feature layer
         var statePolygonLayer = new FeatureLayer({
@@ -166,46 +200,6 @@
           }
         });
 
-        // Create GeoJSONLayers with simple renderer and enable popups
-        var pointLayer = new GeoJSONLayer({
-          url: pointGeoJsonUrl,
-          title: "Point Location History",
-          renderer: {
-            type: "simple",
-            symbol: {
-              type: "simple-marker",
-              color: "blue",
-              size: "8px",
-              outline: {
-                color: "white",
-                width: 1
-              }
-            }
-          },
-          popupTemplate: {
-            title: "Point Feature",
-            content: "Type: {type}"
-          }
-        });
-
-        var polylineLayer = new GeoJSONLayer({
-          url: polylineGeoJsonUrl,
-          title: "Polyline Location History",
-          renderer: {
-            type: "simple",
-            symbol: {
-              type: "simple-line",
-              color: "orange",
-              width: 2,
-              opacity: 0.5
-            }
-          },
-          popupTemplate: {
-            title: "Polyline Feature",
-            content: "Type Change: {type_change}"
-          }
-        });
-
         // Add the layers to the map with points and lines on top of polygons
         map.addMany([statePolygonLayer, countiesLayer, californiaCitiesLayer, oregonCitiesLayer, washingtonCitiesLayer, polylineLayer, pointLayer]);
 
@@ -215,25 +209,6 @@
         });
 
         view.ui.add(layerList, "top-right");
-
-        // Debugging to log features for inspection and error handling
-        function logLayerStatus(layer, layerName) {
-          layer.when(() => {
-            layer.queryFeatures().then((featureSet) => {
-              console.log(layerName + " Features: ", featureSet.features.map(f => f.attributes));
-            });
-          }).catch((error) => {
-            console.error("Error loading " + layerName + " layer: ", error);
-          });
-        }
-
-        logLayerStatus(pointLayer, "Point Layer");
-        logLayerStatus(polylineLayer, "Polyline Layer");
-        logLayerStatus(statePolygonLayer, "State Polygon Layer");
-        logLayerStatus(countiesLayer, "Counties Layer");
-        logLayerStatus(californiaCitiesLayer, "California Cities Layer");
-        logLayerStatus(oregonCitiesLayer, "Oregon Cities Layer");
-        logLayerStatus(washingtonCitiesLayer, "Washington Cities Layer");
       });
     </script>
   </body>
