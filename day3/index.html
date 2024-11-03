@@ -25,8 +25,9 @@
       require([
         "esri/Map",
         "esri/views/MapView",
+        "esri/layers/FeatureLayer",
         "esri/layers/GeoJSONLayer"
-      ], function (Map, MapView, GeoJSONLayer) {
+      ], function (Map, MapView, FeatureLayer, GeoJSONLayer) {
         // Create the map
         var map = new Map({
           basemap: "streets-navigation-vector"
@@ -43,7 +44,32 @@
         // Define URLs for GeoJSON layers
         var pointGeoJsonUrl = "https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day2/LocationHistor_FeaturesToJSO.geojson";
         var polylineGeoJsonUrl = "https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day2/LocationHistoryPolyline_FeaturesToJSO.geojson";
+        
+        // URL for the state boundaries feature layer
+        var stateFeatureLayerUrl = "https://services.arcgis.com/ue9rwulIoeLEI9bj/arcgis/rest/services/US_StateBoundaries/FeatureServer/0";
 
+        // Create the state boundary feature layer
+        var statePolygonLayer = new FeatureLayer({
+          url: stateFeatureLayerUrl,
+          title: "State Boundaries",
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-fill",
+              color: [51, 102, 255, 0.3], // Light blue fill with opacity
+              outline: {
+                color: "navy",
+                width: 1
+              }
+            }
+          },
+          popupTemplate: {
+            title: "{STATE_NAME}",
+            content: "State Name: {STATE_NAME}"
+          }
+        });
+
+        // Create GeoJSONLayers with simple renderer and enable popups
         var pointLayer = new GeoJSONLayer({
           url: pointGeoJsonUrl,
           title: "Point Location History",
@@ -64,8 +90,7 @@
             content: "Type: {type}"
           }
         });
-        
-        // Create GeoJSONLayers with simple renderer and enable popups
+
         var polylineLayer = new GeoJSONLayer({
           url: polylineGeoJsonUrl,
           title: "Polyline Location History",
@@ -75,7 +100,7 @@
               type: "simple-line",
               color: "orange",
               width: 2,
-            opacity: 0.5
+              opacity: 0.5
             }
           },
           popupTemplate: {
@@ -84,10 +109,8 @@
           }
         });
 
-
-
-        // Add the GeoJSON layers to the map with points on top of lines
-        map.addMany([polylineLayer, pointLayer]);
+        // Add the layers to the map with points and lines on top of polygons
+        map.addMany([statePolygonLayer, polylineLayer, pointLayer]);
 
         // Debugging to log features for inspection
         pointLayer.when(() => {
@@ -99,6 +122,12 @@
         polylineLayer.when(() => {
           polylineLayer.queryFeatures().then((featureSet) => {
             console.log("Polyline Layer Features: ", featureSet.features.map(f => f.attributes));
+          });
+        });
+
+        statePolygonLayer.when(() => {
+          statePolygonLayer.queryFeatures().then((featureSet) => {
+            console.log("State Polygon Layer Features: ", featureSet.features.map(f => f.attributes));
           });
         });
       });
