@@ -21,13 +21,15 @@
   </head>
   <body>
     <div id="viewDiv"></div>
+    <div id="layerListDiv" style="position: absolute; top: 10px; right: 10px; z-index: 99; background: white; padding: 10px;"></div>
     <script>
       require([
         "esri/Map",
         "esri/views/MapView",
         "esri/layers/FeatureLayer",
-        "esri/layers/GeoJSONLayer"
-      ], function (Map, MapView, FeatureLayer, GeoJSONLayer) {
+        "esri/layers/GeoJSONLayer",
+        "esri/widgets/LayerList"
+      ], function (Map, MapView, FeatureLayer, GeoJSONLayer, LayerList) {
         // Create the map
         var map = new Map({
           basemap: "streets-navigation-vector"
@@ -111,6 +113,12 @@
 
         // Add the layers to the map with points and lines on top of polygons
         map.addMany([statePolygonLayer, polylineLayer, pointLayer]);
+
+        // Create a LayerList widget instance and add it to the view
+        var layerList = new LayerList({
+          view: view,
+          container: "layerListDiv"
+        });
 
         // Debugging to log features for inspection
         pointLayer.when(() => {
