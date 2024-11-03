@@ -54,15 +54,7 @@
       </calcite-table>
     </calcite-panel>
     <script>
-      require([
-        "esri/Map",
-        "esri/views/MapView",
-        "esri/layers/FeatureLayer",
-        "esri/layers/GeoJSONLayer",
-        "esri/widgets/LayerList",
-        "esri/rest/support/Query"
-      ], function (Map, MapView, FeatureLayer, GeoJSONLayer, LayerList, Query) {
-        // Create the map
+      require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/layers/GeoJSONLayer", "esri/widgets/LayerList", "esri/rest/query"], function (Map, MapView, FeatureLayer, GeoJSONLayer, LayerList, query) { // Create the map
         var map = new Map({
           basemap: "streets-navigation-vector"
         });
@@ -272,19 +264,21 @@
         function performSpatialQueries() {
           var cityLayers = [californiaCitiesLayer, oregonCitiesLayer, washingtonCitiesLayer];
           cityLayers.forEach(function (cityLayer) {
-            var query = cityLayer.createQuery();
-            query.returnGeometry = true;
-            query.outFields = ["*"];
-
-            cityLayer.queryFeatures(query).then(function (cityFeatureSet) {
+            var queryOptions = {
+              where: "1=1",
+              returnGeometry: true,
+              outFields: ["*"]
+            };
+            query.executeQueryJSON(cityLayer.url, queryOptions).then(function (cityFeatureSet) {
               cityFeatureSet.features.forEach(function (cityFeature) {
                 var cityGeometry = cityFeature.geometry;
-                var pointQuery = pointLayer.createQuery();
-                pointQuery.geometry = cityGeometry;
-                pointQuery.spatialRelationship = "intersects";
-                pointQuery.returnGeometry = false;
-
-                pointLayer.queryFeatures(pointQuery).then(function (pointFeatureSet) {
+                var pointQuery = var pointQueryOptions = {
+                  geometry: cityGeometry,
+                  spatialRelationship: "intersects",
+                  returnGeometry: false,
+                  outFields: ["*"]
+                };
+                query.executeQueryJSON(pointLayer.url, pointQueryOptions).then(function (pointFeatureSet) {
                   var pointCount = pointFeatureSet.features.length;
                   var tableBody = document.getElementById("tableBody");
                   var row = document.createElement("tr");
