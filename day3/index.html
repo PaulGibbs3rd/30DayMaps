@@ -49,8 +49,8 @@
         // URL for the state boundaries feature layer
         var stateFeatureLayerUrl = "https://services.arcgis.com/ue9rwulIoeLEI9bj/arcgis/rest/services/US_StateBoundaries/FeatureServer/0";
         
-        // URL for the Census counties feature layer
-        var countiesFeatureLayerUrl = "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_Census_Counties/FeatureServer";
+        // URL for the Census counties feature layer (specify layer index 0 explicitly)
+        var countiesFeatureLayerUrl = "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_Census_Counties/FeatureServer/0";
 
         // Create the state boundary feature layer
         var statePolygonLayer = new FeatureLayer({
