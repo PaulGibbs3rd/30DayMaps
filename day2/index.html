@@ -44,7 +44,24 @@
         var pointGeoJsonUrl = "https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day2/LocationHistor_FeaturesToJSO.geojson";
         var polylineGeoJsonUrl = "https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day2/LocationHistoryPolyline_FeaturesToJSO.geojson";
 
-        // Create GeoJSONLayers with simple renderer
+        // Create GeoJSONLayers with simple renderer and enable popups
+        var polylineLayer = new GeoJSONLayer({
+          url: polylineGeoJsonUrl,
+          title: "Polyline Location History",
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-line",
+              color: "orange",
+              width: 2
+            }
+          },
+          popupTemplate: {
+            title: "Polyline Feature",
+            content: "Type Change: {type_change}"
+          }
+        });
+
         var pointLayer = new GeoJSONLayer({
           url: pointGeoJsonUrl,
           title: "Point Location History",
@@ -59,24 +76,15 @@
                 width: 1
               }
             }
+          },
+          popupTemplate: {
+            title: "Point Feature",
+            content: "Type: {type}"
           }
         });
 
-        var polylineLayer = new GeoJSONLayer({
-          url: polylineGeoJsonUrl,
-          title: "Polyline Location History",
-          renderer: {
-            type: "simple",
-            symbol: {
-              type: "simple-line",
-              color: "orange",
-              width: 2
-            }
-          }
-        });
-
-        // Add the GeoJSON layers to the map
-        map.addMany([pointLayer, polylineLayer]);
+        // Add the GeoJSON layers to the map with points on top of lines
+        map.addMany([polylineLayer, pointLayer]);
 
         // Debugging to log features for inspection
         pointLayer.when(() => {
