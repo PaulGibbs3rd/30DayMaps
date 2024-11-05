@@ -94,6 +94,7 @@
         var hexagonLayer = new FeatureLayer({
           url: hexagonLayerUrl,
           title: "Day 4 Hexagon Counts",
+          definitionExpression: "PointCnt > 0 OR COUNT_OBJE > 0 OR COUNT_OB_1 > 0",
           renderer: {
             type: "simple",
             symbol: {
