@@ -46,22 +46,7 @@
         var polylineFeatureLayerUrl = "https://services7.arcgis.com/qp1aCwLndloqH0vh/arcgis/rest/services/LocationHistoryPolylines/FeatureServer";
         var hexagonLayerUrl = "https://services7.arcgis.com/qp1aCwLndloqH0vh/arcgis/rest/services/hexagons_with_counts/FeatureServer";
 
-        // URL for the state boundaries feature layer
-        var stateFeatureLayerUrl = "https://services.arcgis.com/ue9rwulIoeLEI9bj/arcgis/rest/services/US_StateBoundaries/FeatureServer/0";
-        
-        // URL for the Census counties feature layer
-        var countiesFeatureLayerUrl = "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_Census_Counties/FeatureServer/0";
-        
-        // URL for the California cities feature layer
-        var californiaCitiesFeatureLayerUrl = "https://services7.arcgis.com/RZTs81UMZhbC5iCo/arcgis/rest/services/California_Cities_(Polygons)/FeatureServer/0";
-        
-        // URL for the Oregon cities feature layer
-        var oregonCitiesFeatureLayerUrl = "https://gis.odot.state.or.us/arcgis1006/rest/services/data_layers/city_limits/MapServer/0";
-        
-        // URL for the Washington cities feature layer
-        var washingtonCitiesFeatureLayerUrl = "https://services2.arcgis.com/J4VMdGWiZXReffvo/arcgis/rest/services/CityLimits/FeatureServer/0";
-
-        // Create FeatureLayers for points and polylines
+        // Create FeatureLayers with corrected popup templates
         var pointLayer = new FeatureLayer({
           url: pointFeatureLayerUrl,
           title: "Point Location History",
@@ -79,7 +64,7 @@
           },
           popupTemplate: {
             title: "Point Feature",
-            content: "Coordinates: {x}, {y}"
+            content: "<b>Latitude:</b> {Latitude}<br><b>Longitude:</b> {Longitude}"
           }
         });
 
@@ -97,11 +82,10 @@
           },
           popupTemplate: {
             title: "Polyline Feature",
-            content: "Type Change: {type_change}"
+            content: "<b>Type Change:</b> {type_change}"
           }
         });
 
-        // Create the hexagon layer with custom renderer and popup
         var hexagonLayer = new FeatureLayer({
           url: hexagonLayerUrl,
           title: "Hexagon Counts",
@@ -118,124 +102,12 @@
           },
           popupTemplate: {
             title: "Hexagon Count",
-            content: "Count: {count}"
+            content: "<b>Count:</b> {count}"
           }
         });
 
-        // Create the state boundary feature layer
-        var statePolygonLayer = new FeatureLayer({
-          url: stateFeatureLayerUrl,
-          title: "State Boundaries",
-          renderer: {
-            type: "simple",
-            symbol: {
-              type: "simple-fill",
-              color: [51, 102, 255, 0.3], // Light blue fill with opacity
-              outline: {
-                color: "navy",
-                width: 1
-              }
-            }
-          },
-          popupTemplate: {
-            title: "{STATE_NAME}",
-            content: "State Name: {STATE_NAME}"
-          }
-        });
-
-        // Create the counties feature layer
-        var countiesLayer = new FeatureLayer({
-          url: countiesFeatureLayerUrl,
-          title: "Census Counties",
-          renderer: {
-            type: "simple",
-            symbol: {
-              type: "simple-fill",
-              color: [255, 255, 102, 0.3], // Yellow fill with opacity
-              outline: {
-                color: "gray",
-                width: 0.5
-              }
-            }
-          },
-          popupTemplate: {
-            title: "{NAME}",
-            content: "County Name: {NAME}"
-          }
-        });
-
-        // Create the California, Oregon, and Washington city layers
-        var californiaCitiesLayer = new FeatureLayer({
-          url: californiaCitiesFeatureLayerUrl,
-          title: "California Cities",
-          renderer: {
-            type: "simple",
-            symbol: {
-              type: "simple-fill",
-              color: [0, 204, 102, 0.3], // Green fill with opacity
-              outline: {
-                color: "darkgreen",
-                width: 1
-              }
-            }
-          },
-          popupTemplate: {
-            title: "{CITY_NAME}",
-            content: "City Name: {CITY_NAME}"
-          }
-        });
-
-        var oregonCitiesLayer = new FeatureLayer({
-          url: oregonCitiesFeatureLayerUrl,
-          title: "Oregon Cities",
-          renderer: {
-            type: "simple",
-            symbol: {
-              type: "simple-fill",
-              color: [102, 153, 255, 0.3], // Light blue fill with opacity
-              outline: {
-                color: "blue",
-                width: 1
-              }
-            }
-          },
-          popupTemplate: {
-            title: "{CITY_NAME}",
-            content: "City Name: {CITY_NAME}"
-          }
-        });
-
-        var washingtonCitiesLayer = new FeatureLayer({
-          url: washingtonCitiesFeatureLayerUrl,
-          title: "Washington Cities",
-          renderer: {
-            type: "simple",
-            symbol: {
-              type: "simple-fill",
-              color: [153, 51, 255, 0.3], // Purple fill with opacity
-              outline: {
-                color: "purple",
-                width: 1
-              }
-            }
-          },
-          popupTemplate: {
-            title: "{CITY_NAME}",
-            content: "City Name: {CITY_NAME}"
-          }
-        });
-
-        // Add all layers to the map
-        map.addMany([
-          statePolygonLayer,
-          countiesLayer,
-          californiaCitiesLayer,
-          oregonCitiesLayer,
-          washingtonCitiesLayer,
-          hexagonLayer,
-          polylineLayer,
-          pointLayer
-        ]);
+        // Add the layers to the map
+        map.addMany([hexagonLayer, polylineLayer, pointLayer]);
 
         // Create a LayerList widget instance and add it to the view
         var layerList = new LayerList({
