@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Day 3 Map with Polygons</title>
+    <title>Day 4 Map with Hexagons</title>
     <link
       rel="stylesheet"
       href="https://js.arcgis.com/4.30/esri/themes/light/main.css"
@@ -44,7 +44,12 @@
         // Define URLs for the new FeatureLayers
         var pointFeatureLayerUrl = "https://services7.arcgis.com/qp1aCwLndloqH0vh/arcgis/rest/services/LocationHistoryLayer/FeatureServer";
         var polylineFeatureLayerUrl = "https://services7.arcgis.com/qp1aCwLndloqH0vh/arcgis/rest/services/LocationHistoryPolylines/FeatureServer";
-        var hexagonLayerUrl = "https://services7.arcgis.com/qp1aCwLndloqH0vh/arcgis/rest/services/hexagons_with_counts/FeatureServer";
+        var hexagonLayerUrl = "https://services7.arcgis.com/qp1aCwLndloqH0vh/arcgis/rest/services/day4_hexagons_with_counts/FeatureServer";
+        var stateFeatureLayerUrl = "https://services.arcgis.com/ue9rwulIoeLEI9bj/arcgis/rest/services/US_StateBoundaries/FeatureServer/0";
+        var countiesFeatureLayerUrl = "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_Census_Counties/FeatureServer/0";
+        var californiaCitiesFeatureLayerUrl = "https://services7.arcgis.com/RZTs81UMZhbC5iCo/arcgis/rest/services/California_Cities_(Polygons)/FeatureServer/0";
+        var oregonCitiesFeatureLayerUrl = "https://gis.odot.state.or.us/arcgis1006/rest/services/data_layers/city_limits/MapServer/0";
+        var washingtonCitiesFeatureLayerUrl = "https://services2.arcgis.com/J4VMdGWiZXReffvo/arcgis/rest/services/CityLimits/FeatureServer/0";
 
         // Create FeatureLayers with corrected popup templates
         var pointLayer = new FeatureLayer({
@@ -64,7 +69,7 @@
           },
           popupTemplate: {
             title: "Point Feature",
-            content: "<b>Latitude:</b> {Latitude}<br><b>Longitude:</b> {Longitude}"
+            content: "<b>Latitude:</b> {Latitude}<br><b>Longitude:</b> {Longitude}<br><b>Timestamp:</b> {timestamp}<br><b>Type:</b> {type}"
           }
         });
 
@@ -82,13 +87,13 @@
           },
           popupTemplate: {
             title: "Polyline Feature",
-            content: "<b>Type Change:</b> {type_change}"
+            content: "<b>Type Change:</b> {type_change}<br><b>Time Arrived:</b> {time_arrived}<br><b>Shape Length:</b> {Shape_Length}"
           }
         });
 
         var hexagonLayer = new FeatureLayer({
           url: hexagonLayerUrl,
-          title: "Hexagon Counts",
+          title: "Day 4 Hexagon Counts",
           renderer: {
             type: "simple",
             symbol: {
@@ -102,12 +107,57 @@
           },
           popupTemplate: {
             title: "Hexagon Count",
-            content: "<b>Count:</b> {count}"
+            content: "<b>Grid ID:</b> {GRID_ID}<br><b>State:</b> {ST}<br><b>Point Count:</b> {PointCnt}<br><b>Object Count:</b> {COUNT_OBJE}<br><b>Additional Count:</b> {COUNT_OB_1}"
+          }
+        });
+
+        var stateLayer = new FeatureLayer({
+          url: stateFeatureLayerUrl,
+          title: "US State Boundaries",
+          popupTemplate: {
+            title: "State Information",
+            content: "<b>State Name:</b> {NAME}<br><b>State Abbreviation:</b> {STATE_ABBR}<br><b>Population:</b> {POP}"
+          }
+        });
+
+        var countiesLayer = new FeatureLayer({
+          url: countiesFeatureLayerUrl,
+          title: "USA Census Counties",
+          popupTemplate: {
+            title: "County Information",
+            content: "<b>County Name:</b> {NAME}<br><b>State:</b> {STATE_NAME}<br><b>Population:</b> {POPULATION_2020}"
+          }
+        });
+
+        var californiaCitiesLayer = new FeatureLayer({
+          url: californiaCitiesFeatureLayerUrl,
+          title: "California Cities",
+          popupTemplate: {
+            title: "City Information",
+            content: "<b>City Name:</b> {CITY}<br><b>County:</b> {COUNTY}<br><b>Area:</b> {SHAPE__Area}"
+          }
+        });
+
+        var oregonCitiesLayer = new FeatureLayer({
+          url: oregonCitiesFeatureLayerUrl,
+          title: "Oregon Cities",
+          popupTemplate: {
+            title: "City Information",
+            content: "<b>City Name:</b> {CITYNAME}<br><b>Description:</b> {descriptn}<br><b>Acres:</b> {acres}"
+          }
+        });
+
+        var washingtonCitiesLayer = new FeatureLayer({
+          url: washingtonCitiesFeatureLayerUrl,
+          title: "Washington Cities",
+          popupTemplate: {
+            title: "City Information",
+            content: "<b>City Name:</b> {CITY_NM}<br><b>County Name:</b> {COUNTY_NM}<br><b>FIPS:</b> {FIPS_PLC}"
           }
         });
 
         // Add the layers to the map
-        map.addMany([hexagonLayer, polylineLayer, pointLayer]);
+        map.addMany([hexagonLayer, polylineLayer, pointLayer, stateLayer, countiesLayer, californiaCitiesLayer, oregonCitiesLayer, washingtonCitiesLayer]);
 
         // Create a LayerList widget instance and add it to the view
         var layerList = new LayerList({
