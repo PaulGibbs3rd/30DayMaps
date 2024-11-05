@@ -156,8 +156,8 @@
           }
         });
 
-        // Add the layers to the map
-        map.addMany([hexagonLayer, polylineLayer, pointLayer, stateLayer, countiesLayer, californiaCitiesLayer, oregonCitiesLayer, washingtonCitiesLayer]);
+        // Add the layers to the map in the specified order (bottom to top)
+        map.addMany([stateLayer, countiesLayer, californiaCitiesLayer, oregonCitiesLayer, washingtonCitiesLayer, hexagonLayer, polylineLayer, pointLayer]);
 
         // Create a LayerList widget instance and add it to the view
         var layerList = new LayerList({
