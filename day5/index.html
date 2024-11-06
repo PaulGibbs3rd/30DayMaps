@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Day 4 Map with Hexagons and Time Slider</title>
+    <title>Day 5 - A Journey Map with Hexagons and Time Slider</title>
     <link
       rel="stylesheet"
       href="https://js.arcgis.com/4.30/esri/themes/light/main.css"
@@ -35,8 +35,9 @@
         "esri/views/MapView",
         "esri/layers/FeatureLayer",
         "esri/widgets/LayerList",
-        "esri/widgets/TimeSlider"
-      ], function (Map, MapView, FeatureLayer, LayerList, TimeSlider) {
+        "esri/widgets/TimeSlider",
+        "esri/geometry/extent"
+      ], function (Map, MapView, FeatureLayer, LayerList, TimeSlider, Extent) {
         // Create the map
         var map = new Map({
           basemap: "streets-navigation-vector"
@@ -108,7 +109,7 @@
 
         var hexagonLayer = new FeatureLayer({
           url: hexagonLayerUrl,
-          title: "Day 4 Hexagon Counts",
+          title: "Day 5 Journey Hexagon Counts",
           definitionExpression: "PointCnt > 0 OR COUNT_OBJE > 0 OR COUNT_OB_1 > 0",
           renderer: {
             type: "simple",
@@ -204,6 +205,17 @@
         // Wait for the view to load before adding the TimeSlider to the view's time extent
         view.when(function () {
           view.timeExtent = timeSlider.timeExtent;
+        });
+
+        // Update the map extent as time changes
+        timeSlider.watch("timeExtent", function(timeExtent) {
+          pointLayer.queryExtent({
+            timeExtent: timeExtent
+          }).then(function(result) {
+            if (result.extent) {
+              view.goTo(result.extent.expand(1.5));
+            }
+          });
         });
       });
     </script>
