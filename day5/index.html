@@ -127,9 +127,53 @@
           }
         });
 
-        // Create other FeatureLayers as before...
-        // Add all layers to the map
-        map.addMany([hexagonLayer, pointLayer, polylineLayer]); 
+        var stateLayer = new FeatureLayer({
+          url: stateFeatureLayerUrl,
+          title: "US State Boundaries",
+          popupTemplate: {
+            title: "State Information",
+            content: "<b>State Name:</b> {NAME}<br><b>State Abbreviation:</b> {STATE_ABBR}<br><b>Population:</b> {POP}"
+          }
+        });
+
+        var countiesLayer = new FeatureLayer({
+          url: countiesFeatureLayerUrl,
+          title: "USA Census Counties",
+          popupTemplate: {
+            title: "County Information",
+            content: "<b>County Name:</b> {NAME}<br><b>State:</b> {STATE_NAME}<br><b>Population:</b> {POPULATION_2020}"
+          }
+        });
+
+        var californiaCitiesLayer = new FeatureLayer({
+          url: californiaCitiesFeatureLayerUrl,
+          title: "California Cities",
+          popupTemplate: {
+            title: "City Information",
+            content: "<b>City Name:</b> {CITY}<br><b>County:</b> {COUNTY}<br><b>Area:</b> {SHAPE__Area}"
+          }
+        });
+
+        var oregonCitiesLayer = new FeatureLayer({
+          url: oregonCitiesFeatureLayerUrl,
+          title: "Oregon Cities",
+          popupTemplate: {
+            title: "City Information",
+            content: "<b>City Name:</b> {CITYNAME}<br><b>Description:</b> {descriptn}<br><b>Acres:</b> {acres}"
+          }
+        });
+
+        var washingtonCitiesLayer = new FeatureLayer({
+          url: washingtonCitiesFeatureLayerUrl,
+          title: "Washington Cities",
+          popupTemplate: {
+            title: "City Information",
+            content: "<b>City Name:</b> {CITY_NM}<br><b>County Name:</b> {COUNTY_NM}<br><b>FIPS:</b> {FIPS_PLC}"
+          }
+        });
+
+        // Add the layers to the map in the specified order (bottom to top)
+        map.addMany([stateLayer, countiesLayer, californiaCitiesLayer, oregonCitiesLayer, washingtonCitiesLayer, hexagonLayer, polylineLayer, pointLayer]);
 
         // Create a LayerList widget instance and add it to the view
         var layerList = new LayerList({
@@ -144,13 +188,13 @@
           view: view,
           mode: "time-window", // Optional: can also be 'instant' or 'cumulative'
           fullTimeExtent: {
-            start: new Date(2022, 0, 1), // Define the start date
-            end: new Date(2023, 0, 1) // Define the end date
+            start: new Date(2022, 10, 1), // November 1, 2022 (month index is zero-based, so 10 is November)
+            end: new Date(2022, 11, 31) // December 31, 2022 (month index is zero-based, so 11 is December)
           },
           stops: {
             interval: {
               value: 1,
-              unit: "months"
+              unit: "days" // Adjust interval to show daily steps
             }
           }
         });
