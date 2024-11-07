@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Day 5 - A Journey Map with Hexagons and Time Slider</title>
+    <title>Day 6 - North America Monthly Precipitation Map</title>
     <link
       rel="stylesheet"
       href="https://js.arcgis.com/4.30/esri/themes/light/main.css"
@@ -187,23 +187,7 @@
         // Create a LayerList widget instance and add it to the view
         var layerList = new LayerList({
           view: view,
-          listItemCreatedFunction: function(event) {
-            event.item.panel = {
-              content: "legend",
-              open: true
-            };
-            event.item.actionsSections = [[{
-              title: "Move layer",
-              className: "esri-icon-drag-horizontal",
-              id: "move-layer"
-            }]];
-          },
-          // Enable drag and drop functionality
-          container: view.container,
-          multipleSelectionEnabled: true,
-          visibleElements: {
-            statusIndicators: true
-          }
+          dragEnabled: true
         });
 
         view.ui.add(layerList, "top-right");
