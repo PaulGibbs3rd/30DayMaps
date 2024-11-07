@@ -64,8 +64,7 @@
         var washingtonCitiesFeatureLayerUrl = "https://services2.arcgis.com/J4VMdGWiZXReffvo/arcgis/rest/services/CityLimits/FeatureServer/0";
         var precipitationTileLayerUrl = "https://tiles.arcgis.com/tiles/oF9CDB4lUYF7Um9q/arcgis/rest/services/NA_Monthly_Precipitation/MapServer";
 
-        // Create FeatureLayers with corrected popup templates
-        var pointLayer = new FeatureLayer({
+        $1var pointLayer = new FeatureLayer({
           url: pointFeatureLayerUrl,
           title: "Point Location History",
           renderer: {
@@ -86,6 +85,99 @@
           },
           timeInfo: {
             startField: "timestamp" // Field containing time information
+          }
+        });
+
+        var polylineLayer = new FeatureLayer({
+          url: polylineFeatureLayerUrl,
+          title: "Polyline Location History",
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-line",
+              color: "orange",
+              width: 2,
+              opacity: 0.5
+            }
+          },
+          popupTemplate: {
+            title: "Polyline Feature",
+            content: "<b>Type Change:</b> {type_change}<br><b>Time Arrived:</b> {time_arrived}<br><b>Shape Length:</b> {Shape_Length}"
+          },
+          timeInfo: {
+            startField: "time_arrived" // Field containing time information
+          }
+        });
+
+        var precipitationTileLayer = new TileLayer({
+          url: precipitationTileLayerUrl,
+          title: "North America Monthly Precipitation",
+          opacity: 0.7
+        });
+
+        var washingtonCitiesLayer = new FeatureLayer({
+          url: washingtonCitiesFeatureLayerUrl,
+          title: "Washington Cities",
+          popupTemplate: {
+            title: "City Information",
+            content: "<b>City Name:</b> {CITY_NM}<br><b>County Name:</b> {COUNTY_NM}<br><b>FIPS:</b> {FIPS_PLC}"
+          }
+        });
+
+        var californiaCitiesLayer = new FeatureLayer({
+          url: californiaCitiesFeatureLayerUrl,
+          title: "California Cities",
+          popupTemplate: {
+            title: "City Information",
+            content: "<b>City Name:</b> {CITY}<br><b>County:</b> {COUNTY}<br><b>Area:</b> {SHAPE__Area}"
+          }
+        });
+
+        var oregonCitiesLayer = new FeatureLayer({
+          url: oregonCitiesFeatureLayerUrl,
+          title: "Oregon Cities",
+          popupTemplate: {
+            title: "City Information",
+            content: "<b>City Name:</b> {CITYNAME}<br><b>Description:</b> {descriptn}<br><b>Acres:</b> {acres}"
+          }
+        });
+
+        var hexagonLayer = new FeatureLayer({
+          url: hexagonLayerUrl,
+          title: "Day 5 Journey Hexagon Counts",
+          definitionExpression: "PointCnt > 0 OR COUNT_OBJE > 0 OR COUNT_OB_1 > 0",
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-fill",
+              color: [255, 0, 0, 0.3], // Red fill with opacity
+              outline: {
+                color: "red",
+                width: 1
+              }
+            }
+          },
+          popupTemplate: {
+            title: "Hexagon Count",
+            content: "<b>Grid ID:</b> {GRID_ID}<br><b>State:</b> {ST}<br><b>Point Count:</b> {PointCnt}<br><b>Object Count:</b> {COUNT_OBJE}<br><b>Additional Count:</b> {COUNT_OB_1}"
+          }
+        });
+
+        var countiesLayer = new FeatureLayer({
+          url: countiesFeatureLayerUrl,
+          title: "USA Census Counties",
+          popupTemplate: {
+            title: "County Information",
+            content: "<b>County Name:</b> {NAME}<br><b>State:</b> {STATE_NAME}<br><b>Population:</b> {POPULATION_2020}"
+          }
+        });
+
+        var stateLayer = new FeatureLayer({
+          url: stateFeatureLayerUrl,
+          title: "US State Boundaries",
+          popupTemplate: {
+            title: "State Information",
+            content: "<b>State Name:</b> {NAME}<br><b>State Abbreviation:</b> {STATE_ABBR}<br><b>Population:</b> {POP}"
           }
         });
 
