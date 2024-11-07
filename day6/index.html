@@ -184,15 +184,15 @@
 
         // Add the layers to the map in the specified order (bottom to top)
         map.addMany([
-          pointLayer,
-          polylineLayer,
-          precipitationTileLayer,
-          washingtonCitiesLayer,
-          oregonCitiesLayer,
-          californiaCitiesLayer,
-          hexagonLayer,
+          countiesLayer,
           stateLayer,
-          countiesLayer
+          hexagonLayer,
+          californiaCitiesLayer,
+          oregonCitiesLayer,
+          washingtonCitiesLayer,
+          precipitationTileLayer,
+          polylineLayer,
+          pointLayer
         ]);
 
         // Create a LayerList widget instance and add it to the view
