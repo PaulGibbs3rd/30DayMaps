@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Day 5 - A Journey Map with Hexagons and Time Slider</title>
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.30/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.30/"></script>
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+      #timeSliderDiv {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        z-index: 99;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+    <div id="timeSliderDiv"></div>
+    <script>
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/FeatureLayer",
+        "esri/layers/ImageryLayer",
+        "esri/layers/TileLayer",
+        "esri/widgets/LayerList",
+        "esri/widgets/TimeSlider"
+      ], function (Map, MapView, FeatureLayer, ImageryLayer, TileLayer, LayerList, TimeSlider) {
+        // Create the map
+        var map = new Map({
+          basemap: "streets-navigation-vector"
+        });
+
+        // Create the MapView
+        var view = new MapView({
+          container: "viewDiv",
+          map: map,
+          center: [-98.5795, 39.8283], // Center of the United States
+          zoom: 4
+        });
+
+        // Define URLs for the new layers
+        var pointFeatureLayerUrl = "https://services7.arcgis.com/qp1aCwLndloqH0vh/arcgis/rest/services/LocationHistoryLayer/FeatureServer";
+        var polylineFeatureLayerUrl = "https://services7.arcgis.com/qp1aCwLndloqH0vh/arcgis/rest/services/LocationHistoryPolylines/FeatureServer";
+        var hexagonLayerUrl = "https://services7.arcgis.com/qp1aCwLndloqH0vh/arcgis/rest/services/hexagons_with_counts/FeatureServer/0";
+        var stateFeatureLayerUrl = "https://services.arcgis.com/ue9rwulIoeLEI9bj/arcgis/rest/services/US_StateBoundaries/FeatureServer/0";
+        var countiesFeatureLayerUrl = "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_Census_Counties/FeatureServer/0";
+        var californiaCitiesFeatureLayerUrl = "https://services7.arcgis.com/RZTs81UMZhbC5iCo/arcgis/rest/services/California_Cities_(Polygons)/FeatureServer/0";
+        var oregonCitiesFeatureLayerUrl = "https://gis.odot.state.or.us/arcgis1006/rest/services/data_layers/city_limits/MapServer/0";
+        var washingtonCitiesFeatureLayerUrl = "https://services2.arcgis.com/J4VMdGWiZXReffvo/arcgis/rest/services/CityLimits/FeatureServer/0";
+        var precipitationTileLayerUrl = "https://tiles.arcgis.com/tiles/oF9CDB4lUYF7Um9q/arcgis/rest/services/NA_Monthly_Precipitation/MapServer";
+
+        // Create FeatureLayers with corrected popup templates
+        var pointLayer = new FeatureLayer({
+          url: pointFeatureLayerUrl,
+          title: "Point Location History",
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-marker",
+              color: "blue",
+              size: "8px",
+              outline: {
+                color: "white",
+                width: 1
+              }
+            }
+          },
+          popupTemplate: {
+            title: "Point Feature",
+            content: "<b>Latitude:</b> {Latitude}<br><b>Longitude:</b> {Longitude}<br><b>Timestamp:</b> {timestamp}<br><b>Type:</b> {type}"
+          },
+          timeInfo: {
+            startField: "timestamp" // Field containing time information
+          }
+        });
+
+        var polylineLayer = new FeatureLayer({
+          url: polylineFeatureLayerUrl,
+          title: "Polyline Location History",
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-line",
+              color: "orange",
+              width: 2,
+              opacity: 0.5
+            }
+          },
+          popupTemplate: {
+            title: "Polyline Feature",
+            content: "<b>Type Change:</b> {type_change}<br><b>Time Arrived:</b> {time_arrived}<br><b>Shape Length:</b> {Shape_Length}"
+          },
+          timeInfo: {
+            startField: "time_arrived" // Field containing time information
+          }
+        });
+
+        var hexagonLayer = new FeatureLayer({
+          url: hexagonLayerUrl,
+          title: "Day 5 Journey Hexagon Counts",
+          definitionExpression: "PointCnt > 0 OR COUNT_OBJE > 0 OR COUNT_OB_1 > 0",
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-fill",
+              color: [255, 0, 0, 0.3], // Red fill with opacity
+              outline: {
+                color: "red",
+                width: 1
+              }
+            }
+          },
+          popupTemplate: {
+            title: "Hexagon Count",
+            content: "<b>Grid ID:</b> {GRID_ID}<br><b>State:</b> {ST}<br><b>Point Count:</b> {PointCnt}<br><b>Object Count:</b> {COUNT_OBJE}<br><b>Additional Count:</b> {COUNT_OB_1}"
+          }
+        });
+
+        var stateLayer = new FeatureLayer({
+          url: stateFeatureLayerUrl,
+          title: "US State Boundaries",
+          popupTemplate: {
+            title: "State Information",
+            content: "<b>State Name:</b> {NAME}<br><b>State Abbreviation:</b> {STATE_ABBR}<br><b>Population:</b> {POP}"
+          }
+        });
+
+        var countiesLayer = new FeatureLayer({
+          url: countiesFeatureLayerUrl,
+          title: "USA Census Counties",
+          popupTemplate: {
+            title: "County Information",
+            content: "<b>County Name:</b> {NAME}<br><b>State:</b> {STATE_NAME}<br><b>Population:</b> {POPULATION_2020}"
+          }
+        });
+
+        var californiaCitiesLayer = new FeatureLayer({
+          url: californiaCitiesFeatureLayerUrl,
+          title: "California Cities",
+          popupTemplate: {
+            title: "City Information",
+            content: "<b>City Name:</b> {CITY}<br><b>County:</b> {COUNTY}<br><b>Area:</b> {SHAPE__Area}"
+          }
+        });
+
+        var oregonCitiesLayer = new FeatureLayer({
+          url: oregonCitiesFeatureLayerUrl,
+          title: "Oregon Cities",
+          popupTemplate: {
+            title: "City Information",
+            content: "<b>City Name:</b> {CITYNAME}<br><b>Description:</b> {descriptn}<br><b>Acres:</b> {acres}"
+          }
+        });
+
+        var washingtonCitiesLayer = new FeatureLayer({
+          url: washingtonCitiesFeatureLayerUrl,
+          title: "Washington Cities",
+          popupTemplate: {
+            title: "City Information",
+            content: "<b>City Name:</b> {CITY_NM}<br><b>County Name:</b> {COUNTY_NM}<br><b>FIPS:</b> {FIPS_PLC}"
+          }
+        });
+
+        var precipitationTileLayer = new TileLayer({
+          url: precipitationTileLayerUrl,
+          title: "North America Monthly Precipitation",
+          opacity: 0.7
+        });
+
+        // Add the layers to the map in the specified order (bottom to top)
+        map.addMany([precipitationTileLayer, stateLayer, countiesLayer, californiaCitiesLayer, oregonCitiesLayer, washingtonCitiesLayer, hexagonLayer, polylineLayer, pointLayer]);
+
+        // Create a LayerList widget instance and add it to the view
+        var layerList = new LayerList({
+          view: view
+        });
+
+        view.ui.add(layerList, "top-right");
+
+        // Create the TimeSlider widget instance and add it to the view
+        var timeSlider = new TimeSlider({
+          container: "timeSliderDiv",
+          view: view,
+          mode: "time-window", // Optional: can also be 'instant' or 'cumulative'
+          fullTimeExtent: {
+            start: new Date(2022, 10, 1), // November 1, 2022 (month index is zero-based, so 10 is November)
+            end: new Date(2022, 11, 31) // December 31, 2022 (month index is zero-based, so 11 is December)
+          },
+          stops: {
+            interval: {
+              value: 1,
+              unit: "days" // Adjust interval to show daily steps
+            }
+          }
+        });
+
+        view.ui.add(timeSlider, "manual");
+      });
+    </script>
+  </body>
+</html>
