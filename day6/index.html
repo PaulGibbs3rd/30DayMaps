@@ -125,21 +125,21 @@
           }
         });
 
-        var californiaCitiesLayer = new FeatureLayer({
-          url: californiaCitiesFeatureLayerUrl,
-          title: "California Cities",
-          popupTemplate: {
-            title: "City Information",
-            content: "<b>City Name:</b> {CITY}<br><b>County:</b> {COUNTY}<br><b>Area:</b> {SHAPE__Area}"
-          }
-        });
-
         var oregonCitiesLayer = new FeatureLayer({
           url: oregonCitiesFeatureLayerUrl,
           title: "Oregon Cities",
           popupTemplate: {
             title: "City Information",
             content: "<b>City Name:</b> {CITYNAME}<br><b>Description:</b> {descriptn}<br><b>Acres:</b> {acres}"
+          }
+        });
+
+        var californiaCitiesLayer = new FeatureLayer({
+          url: californiaCitiesFeatureLayerUrl,
+          title: "California Cities",
+          popupTemplate: {
+            title: "City Information",
+            content: "<b>City Name:</b> {CITY}<br><b>County:</b> {COUNTY}<br><b>Area:</b> {SHAPE__Area}"
           }
         });
 
@@ -164,15 +164,6 @@
           }
         });
 
-        var countiesLayer = new FeatureLayer({
-          url: countiesFeatureLayerUrl,
-          title: "USA Census Counties",
-          popupTemplate: {
-            title: "County Information",
-            content: "<b>County Name:</b> {NAME}<br><b>State:</b> {STATE_NAME}<br><b>Population:</b> {POPULATION_2020}"
-          }
-        });
-
         var stateLayer = new FeatureLayer({
           url: stateFeatureLayerUrl,
           title: "US State Boundaries",
@@ -182,17 +173,26 @@
           }
         });
 
+        var countiesLayer = new FeatureLayer({
+          url: countiesFeatureLayerUrl,
+          title: "USA Census Counties",
+          popupTemplate: {
+            title: "County Information",
+            content: "<b>County Name:</b> {NAME}<br><b>State:</b> {STATE_NAME}<br><b>Population:</b> {POPULATION_2020}"
+          }
+        });
+
         // Add the layers to the map in the specified order (bottom to top)
         map.addMany([
           pointLayer,
           polylineLayer,
           precipitationTileLayer,
           washingtonCitiesLayer,
-          californiaCitiesLayer,
           oregonCitiesLayer,
+          californiaCitiesLayer,
           hexagonLayer,
-          countiesLayer,
-          stateLayer
+          stateLayer,
+          countiesLayer
         ]);
 
         // Create a LayerList widget instance and add it to the view
