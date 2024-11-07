@@ -186,7 +186,24 @@
 
         // Create a LayerList widget instance and add it to the view
         var layerList = new LayerList({
-          view: view
+          view: view,
+          listItemCreatedFunction: function(event) {
+            event.item.panel = {
+              content: "legend",
+              open: true
+            };
+            event.item.actionsSections = [[{
+              title: "Move layer",
+              className: "esri-icon-drag-horizontal",
+              id: "move-layer"
+            }]];
+          },
+          // Enable drag and drop functionality
+          container: view.container,
+          multipleSelectionEnabled: true,
+          visibleElements: {
+            statusIndicators: true
+          }
         });
 
         view.ui.add(layerList, "top-right");
