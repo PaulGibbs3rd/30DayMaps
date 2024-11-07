@@ -30,13 +30,16 @@
     <div id="viewDiv"></div>
     <div id="timeSliderDiv"></div>
     <script>
-      ["esri/widgets/Legend",
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/widgets/Legend",
         "esri/layers/FeatureLayer",
         "esri/layers/ImageryLayer",
         "esri/layers/TileLayer",
         "esri/widgets/LayerList",
         "esri/widgets/TimeSlider"
-      ], function (Map, MapView, FeatureLayer, ImageryLayer, TileLayer, LayerList, TimeSlider, Legend) {
+      ], function (Map, MapView, Legend, FeatureLayer, ImageryLayer, TileLayer, LayerList, TimeSlider) {
         // Create the map
         var map = new Map({
           basemap: "streets-navigation-vector"
@@ -198,7 +201,7 @@
           dragEnabled: true
         });
 
-        $1
+        
 
         // Create the Legend widget instance and add it to the view
         var legend = new Legend({
