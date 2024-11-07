@@ -122,7 +122,8 @@
           popupTemplate: {
             title: "City Information",
             content: "<b>City Name:</b> {CITY_NM}<br><b>County Name:</b> {COUNTY_NM}<br><b>FIPS:</b> {FIPS_PLC}"
-          }
+          },
+          visible: true
         });
 
         var oregonCitiesLayer = new FeatureLayer({
@@ -131,7 +132,8 @@
           popupTemplate: {
             title: "City Information",
             content: "<b>City Name:</b> {CITYNAME}<br><b>Description:</b> {descriptn}<br><b>Acres:</b> {acres}"
-          }
+          },
+          visible: true
         });
 
         var californiaCitiesLayer = new FeatureLayer({
@@ -140,7 +142,8 @@
           popupTemplate: {
             title: "City Information",
             content: "<b>City Name:</b> {CITY}<br><b>County:</b> {COUNTY}<br><b>Area:</b> {SHAPE__Area}"
-          }
+          },
+          visible: true
         });
 
         var hexagonLayer = new FeatureLayer({
@@ -161,7 +164,8 @@
           popupTemplate: {
             title: "Hexagon Count",
             content: "<b>Grid ID:</b> {GRID_ID}<br><b>State:</b> {ST}<br><b>Point Count:</b> {PointCnt}<br><b>Object Count:</b> {COUNT_OBJE}<br><b>Additional Count:</b> {COUNT_OB_1}"
-          }
+          },
+          visible: true
         });
 
         var stateLayer = new FeatureLayer({
@@ -170,7 +174,8 @@
           popupTemplate: {
             title: "State Information",
             content: "<b>State Name:</b> {NAME}<br><b>State Abbreviation:</b> {STATE_ABBR}<br><b>Population:</b> {POP}"
-          }
+          },
+          visible: true
         });
 
         var countiesLayer = new FeatureLayer({
@@ -179,7 +184,8 @@
           popupTemplate: {
             title: "County Information",
             content: "<b>County Name:</b> {NAME}<br><b>State:</b> {STATE_NAME}<br><b>Population:</b> {POPULATION_2020}"
-          }
+          },
+          visible: true
         });
 
         // Add the layers to the map in the specified order (bottom to top)
