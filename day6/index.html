@@ -30,15 +30,13 @@
     <div id="viewDiv"></div>
     <div id="timeSliderDiv"></div>
     <script>
-      require([
-        "esri/Map",
-        "esri/views/MapView",
+      $1"esri/widgets/Legend",
         "esri/layers/FeatureLayer",
         "esri/layers/ImageryLayer",
         "esri/layers/TileLayer",
         "esri/widgets/LayerList",
         "esri/widgets/TimeSlider"
-      ], function (Map, MapView, FeatureLayer, ImageryLayer, TileLayer, LayerList, TimeSlider) {
+      ], function (Map, MapView, FeatureLayer, ImageryLayer, TileLayer, LayerList, TimeSlider, Legend) {
         // Create the map
         var map = new Map({
           basemap: "streets-navigation-vector"
@@ -182,7 +180,17 @@
         });
 
         // Add the layers to the map in the specified order (bottom to top)
-        map.addMany([precipitationTileLayer, stateLayer, countiesLayer, californiaCitiesLayer, oregonCitiesLayer, washingtonCitiesLayer, hexagonLayer, polylineLayer, pointLayer]);
+        map.addMany([
+          pointLayer,
+          polylineLayer,
+          precipitationTileLayer,
+          hexagonLayer,
+          washingtonCitiesLayer,
+          oregonCitiesLayer,
+          californiaCitiesLayer,
+          countiesLayer,
+          stateLayer
+        ]);
 
         // Create a LayerList widget instance and add it to the view
         var layerList = new LayerList({
@@ -190,7 +198,20 @@
           dragEnabled: true
         });
 
-        view.ui.add(layerList, "top-right");
+        $1
+
+        // Create the Legend widget instance and add it to the view
+        var legend = new Legend({
+          view: view,
+          layerInfos: [
+            {
+              layer: precipitationTileLayer,
+              title: "Monthly Precipitation"
+            }
+          ]
+        });
+
+        view.ui.add(legend, "bottom-left");
 
         // Create the TimeSlider widget instance and add it to the view
         var timeSlider = new TimeSlider({
@@ -198,8 +219,8 @@
           view: view,
           mode: "time-window", // Optional: can also be 'instant' or 'cumulative'
           fullTimeExtent: {
-            start: new Date(2022, 10, 1), // November 1, 2022 (month index is zero-based, so 10 is November)
-            end: new Date(2022, 11, 31) // December 31, 2022 (month index is zero-based, so 11 is December)
+            start: new Date(2019, 0, 1), // January 1, 2019
+            end: new Date() // Today's date
           },
           stops: {
             interval: {
