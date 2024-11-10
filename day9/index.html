@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 9: AI-Only 3D Map Challenge</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.28/"></script>
+  <style>
+    html, body, #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+    #controlsDiv {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background-color: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    }
+    #legendDiv {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      z-index: 10;
+      background-color: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div id="viewDiv"></div>
+  <div id="controlsDiv">
+    <button id="generateButton">Change Colors</button>
+    <button id="randomBreaksButton">Randomize Breaks</button>
+  </div>
+  <div id="legendDiv">
+    <h3>Legend</h3>
+    <ul id="legendList">
+    </ul>
+  </div>
+  <script>
+    require([ 
+      "esri/Map", 
+      "esri/views/SceneView", 
+      "esri/layers/SceneLayer"
+    ], function(Map, SceneView, SceneLayer) {
+      
+      // Create a 3D map
+      const map = new Map({
+        basemap: "streets-night-vector", // A dark themed basemap for visual contrast
+        ground: "world-elevation"
+      });
+
+      // Create SceneView for 3D visualization
+      const view = new SceneView({
+        container: "viewDiv",
+        map: map,
+        camera: {
+          position: {
+            x: -74.006, // Longitude
+            y: 40.7128, // Latitude (New York City)
+            z: 2000  // Elevation in meters
+          },
+          tilt: 70 // Perspective view
+        }
+      });
+
+      // Load a 3D building SceneLayer to represent current buildings
+      const buildingsLayer = new SceneLayer({
+        portalItem: {
+          id: "ca0470dbbddb4db28bad74ed39949e25" // Sample 3D buildings layer from NYC
+        },
+        popupTemplate: {
+          title: "{Name}",
+          content: "This building is {Height} meters tall. Built in: {Year_Built}"
+        }
+      });
+      map.add(buildingsLayer);
+
+      // Symbolize the buildings using class breaks based on height
+      function applyClassBreaksRenderer(classBreakInfos) {
+        buildingsLayer.renderer = {
+          type: "class-breaks",
+          field: "Height",
+          classBreakInfos: classBreakInfos
+        };
+        updateLegend(classBreakInfos);
+      }
+
+      // Default class breaks
+      const defaultClassBreaks = [
+        {
+          minValue: 0,
+          maxValue: 100,
+          symbol: {
+            type: "mesh-3d",
+            symbolLayers: [
+              {
+                type: "fill",
+                material: {
+                  color: "#FF5733"
+                },
+                edges: {
+                  type: "solid",
+                  color: "#000000"
+                }
+              }
+            ]
+          },
+          label: "0-100 meters"
+        },
+        {
+          minValue: 101,
+          maxValue: 300,
+          symbol: {
+            type: "mesh-3d",
+            symbolLayers: [
+              {
+                type: "fill",
+                material: {
+                  color: "#33FF57"
+                },
+                edges: {
+                  type: "solid",
+                  color: "#000000"
+                }
+              }
+            ]
+          },
+          label: "101-300 meters"
+        },
+        {
+          minValue: 301,
+          maxValue: 541,
+          symbol: {
+            type: "mesh-3d",
+            symbolLayers: [
+              {
+                type: "fill",
+                material: {
+                  color: "#3357FF"
+                },
+                edges: {
+                  type: "solid",
+                  color: "#000000"
+                }
+              }
+            ]
+          },
+          label: "301-541 meters"
+        }
+      ];
+
+      applyClassBreaksRenderer(defaultClassBreaks);
+
+      // Function to update the legend based on class breaks
+      function updateLegend(classBreakInfos) {
+        const legendList = document.getElementById("legendList");
+        legendList.innerHTML = ""; // Clear existing legend items
+
+        classBreakInfos.forEach(function(classBreak) {
+          const listItem = document.createElement("li");
+          listItem.style.color = classBreak.symbol.symbolLayers[0].material.color;
+          listItem.textContent = classBreak.label;
+          legendList.appendChild(listItem);
+        });
+      }
+
+      // Change colors of the buildings when the button is clicked
+      const generateButton = document.getElementById("generateButton");
+      generateButton.onclick = function() {
+        const randomColor1 = '#' + Math.floor(Math.random() * 16777215).toString(16);
+        const randomColor2 = '#' + Math.floor(Math.random() * 16777215).toString(16);
+        const randomColor3 = '#' + Math.floor(Math.random() * 16777215).toString(16);
+
+        const updatedClassBreaks = [
+          {
+            minValue: 0,
+            maxValue: 100,
+            symbol: {
+              type: "mesh-3d",
+              symbolLayers: [
+                {
+                  type: "fill",
+                  material: {
+                    color: randomColor1
+                  },
+                  edges: {
+                    type: "solid",
+                    color: "#000000"
+                  }
+                }
+              ]
+            },
+            label: "0-100 meters"
+          },
+          {
+            minValue: 101,
+            maxValue: 300,
+            symbol: {
+              type: "mesh-3d",
+              symbolLayers: [
+                {
+                  type: "fill",
+                  material: {
+                    color: randomColor2
+                  },
+                  edges: {
+                    type: "solid",
+                    color: "#000000"
+                  }
+                }
+              ]
+            },
+            label: "101-300 meters"
+          },
+          {
+            minValue: 301,
+            maxValue: 541,
+            symbol: {
+              type: "mesh-3d",
+              symbolLayers: [
+                {
+                  type: "fill",
+                  material: {
+                    color: randomColor3
+                  },
+                  edges: {
+                    type: "solid",
+                    color: "#000000"
+                  }
+                }
+              ]
+            },
+            label: "301-541 meters"
+          }
+        ];
+
+        applyClassBreaksRenderer(updatedClassBreaks);
+      };
+
+      // Randomize class breaks when the button is clicked
+      const randomBreaksButton = document.getElementById("randomBreaksButton");
+      randomBreaksButton.onclick = function() {
+        const randomBreak1 = Math.floor(Math.random() * 100) + 1;
+        const randomBreak2 = randomBreak1 + Math.floor(Math.random() * 200) + 1;
+        const maxHeight = 541;
+
+        const randomClassBreaks = [
+          {
+            minValue: 0,
+            maxValue: randomBreak1,
+            symbol: {
+              type: "mesh-3d",
+              symbolLayers: [
+                {
+                  type: "fill",
+                  material: {
+                    color: "#FF5733"
+                  },
+                  edges: {
+                    type: "solid",
+                    color: "#000000"
+                  }
+                }
+              ]
+            },
+            label: `0-${randomBreak1} meters`
+          },
+          {
+            minValue: randomBreak1 + 1,
+            maxValue: randomBreak2,
+            symbol: {
+              type: "mesh-3d",
+              symbolLayers: [
+                {
+                  type: "fill",
+                  material: {
+                    color: "#33FF57"
+                  },
+                  edges: {
+                    type: "solid",
+                    color: "#000000"
+                  }
+                }
+              ]
+            },
+            label: `${randomBreak1 + 1}-${randomBreak2} meters`
+          },
+          {
+            minValue: randomBreak2 + 1,
+            maxValue: maxHeight,
+            symbol: {
+              type: "mesh-3d",
+              symbolLayers: [
+                {
+                  type: "fill",
+                  material: {
+                    color: "#3357FF"
+                  },
+                  edges: {
+                    type: "solid",
+                    color: "#000000"
+                  }
+                }
+              ]
+            },
+            label: `${randomBreak2 + 1}-${maxHeight} meters`
+          }
+        ];
+
+        applyClassBreaksRenderer(randomClassBreaks);
+      };
+    });
+  </script>
+</body>
+</html>
