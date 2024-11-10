@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Health Facilities Map</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h3>Health Facilities Map</h3>
+    <div id="map"></div>
+
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([31.5, 34.5], 8); // Center the map based on Palestine's approx coordinates
+
+        // Add OpenStreetMap base layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Load the GeoJSON data (replace "YOUR_GEOJSON_URL" with the actual path to your GeoJSON file)
+        fetch('https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day8/palestine.geojson')
+            .then(response => response.json())
+            .then(data => {
+                // Define popup content and add markers to the map
+                L.geoJSON(data, {
+                    onEachFeature: function (feature, layer) {
+                        let popupContent = `<div><strong>Shape info</strong><br>` +
+                                          `<strong>source_url:</strong> ${feature.properties.source_url}<br>` +
+                                          `<strong>what3words:</strong> ${feature.properties.what3words}<br>` +
+                                          `<strong>upstream:</strong> ${feature.properties.upstream}<br>` +
+                                          `<strong>name:</strong> ${feature.properties.name}<br>` +
+                                          `<strong>completeness:</strong> ${feature.properties.completeness}<br>` +
+                                          `<strong>uuid:</strong> ${feature.properties.uuid}<br>` +
+                                          `<strong>source:</strong> ${feature.properties.source}<br>` +
+                                          `<strong>type:</strong> ${feature.properties.type}</div>`;
+                        layer.bindPopup(popupContent);
+                    }
+                }).addTo(map);
+            })
+            .catch(error => console.error('Error loading the GeoJSON data:', error));
+    </script>
+</body>
+</html>
