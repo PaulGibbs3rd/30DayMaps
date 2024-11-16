@@ -1,17 +1,12 @@
-<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
     <title>Arctic Sea Ice Extent</title>
-
-    <!-- Load the ArcGIS Maps SDK for JavaScript CSS -->
     <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css" />
-    <!-- Load the ArcGIS Maps SDK for JavaScript -->
     <script src="https://js.arcgis.com/4.31/"></script>
 
     <style>
-      /* Set the layout for the page, ensuring the map and widgets fill the viewport */
       html,
       body,
       #viewDiv {
@@ -20,16 +15,12 @@
         height: 100%;
         width: 100%;
       }
-
-      /* Position the time slider at the bottom of the viewport */
       #timeSlider {
         position: absolute;
         left: 5%;
         right: 5%;
         bottom: 20px;
       }
-
-      /* Style the title div for better visibility */
       #titleDiv {
         padding: 10px;
         font-weight: bold;
@@ -42,26 +33,21 @@
   </head>
 
   <body>
-    <!-- The map container -->
     <div id="viewDiv"></div>
-
-    <!-- The time slider container -->
     <div id="timeSlider"></div>
-
-    <!-- A title for the application -->
     <div id="titleDiv" class="esri-widget">
       Arctic Sea Ice Extent and Median Extent Over Time
     </div>
 
     <script>
       require([
-        "esri/Map", // Core map object
-        "esri/views/MapView", // 2D map view
-        "esri/layers/FeatureLayer", // To display feature layers
-        "esri/widgets/TimeSlider", // For time-based visualization
-        "esri/widgets/Expand", // Expandable widget container
-        "esri/widgets/Legend", // Legend to show layer symbology
-        "esri/widgets/LayerList", // Layer list for toggling layer visibility
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/FeatureLayer",
+        "esri/widgets/TimeSlider",
+        "esri/widgets/Expand",
+        "esri/widgets/Legend",
+        "esri/widgets/LayerList",
       ], function (
         Map,
         MapView,
@@ -71,93 +57,86 @@
         Legend,
         LayerList
       ) {
-        // Define the Arctic Sea Ice Extent layer
+        // Define the two layers
+        
         const seaIceExtentLayer = new FeatureLayer({
           url: "https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/seaice_extent_N_v1/FeatureServer",
-          title: "Arctic Sea Ice Extent", // Title for the layer
+          title: "Arctic Sea Ice Extent",
         });
-
-        // Define the Median Sea Ice Extent for the Arctic layer
+        
         const medianExtentLayer = new FeatureLayer({
           url: "https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/Median_Sea_Ice_Extent_for_the_Arctic/FeatureServer",
-          title: "Median Sea Ice Extent for the Arctic", // Title for the layer
+          title: "Median Sea Ice Extent for the Arctic",
         });
 
-        // Create the map object and add the layers
+
+
+        // Create the map
         const map = new Map({
-          basemap: "topo-vector", // Set the basemap
-          layers: [medianExtentLayer, seaIceExtentLayer], // Add layers to the map
+          basemap: "topo-vector",
+          layers: [medianExtentLayer, seaIceExtentLayer],
         });
 
-        // Create a 2D map view
+        // Create the view
         const view = new MapView({
-          container: "viewDiv", // Reference to the map container
-          map: map, // Map instance
-          center: [0, 70], // Center of the map in [longitude, latitude]
-          zoom: 2, // Initial zoom level
+          container: "viewDiv",
+          map: map,
+          center: [0, 70],
+          zoom: 2,
         });
 
-        // Initialize the TimeSlider widget
+        // Create the time slider widget
         const timeSlider = new TimeSlider({
-          container: "timeSlider", // Reference to the time slider container
-          view: view, // Link the time slider to the map view
-          timeVisible: true, // Display timestamps on the slider
-          loop: true, // Loop through the time extent
-          dragEnabled: true, // Enable manual dragging of the slider
+          container: "timeSlider",
+          view: view,
+          timeVisible: true,
+          loop: true,
+          dragEnabled: true, // Enable dragging on the slider
         });
 
-        // Wait for the Sea Ice Extent layer to load
         view.whenLayerView(seaIceExtentLayer).then(() => {
           seaIceExtentLayer.when(() => {
             const timeInfo = seaIceExtentLayer.timeInfo;
 
-            // Set the time slider to cover the full time extent of the layer
+            // Use the full time extent of the layer
             timeSlider.fullTimeExtent = timeInfo.fullTimeExtent;
 
-            // Configure the slider to increment 1 day at a time
+            // Configure the stops to increment 1 day at a time
             timeSlider.stops = {
               interval: {
-                value: 1, // Increment value
-                unit: "days", // Increment unit
+                value: 1,
+                unit: "days",
               },
             };
 
-            // Start the time slider playback at 10x speed
+            // Start playback at 10x speed
             timeSlider.play({
-              speed: 10, // Playback speed multiplier
+              speed: 1, // Play 10x faster
             });
           });
         });
 
-        // Add a legend widget to display layer symbology
+        // Add a legend
         const legend = new Legend({
-          view: view, // Link the legend to the map view
+          view: view,
         });
-
-        // Wrap the legend in an expandable widget
         const legendExpand = new Expand({
-          view: view, // Link the expandable widget to the map view
-          content: legend, // Content of the expandable widget
-          expanded: false, // Initially collapsed
+          view: view,
+          content: legend,
+          expanded: false,
         });
-
-        // Add the expandable legend widget to the top-right corner
         view.ui.add(legendExpand, "top-right");
 
-        // Add a layer list widget to toggle layer visibility
+        // Add a LayerList widget
         const layerList = new LayerList({
-          view: view, // Link the layer list to the map view
+          view: view,
         });
-
-        // Wrap the layer list in an expandable widget
         const layerListExpand = new Expand({
-          view: view, // Link the expandable widget to the map view
-          content: layerList, // Content of the expandable widget
-          expanded: false, // Initially collapsed
-          expandTooltip: "Layer List", // Tooltip for the expand button
+          view: view,
+          content: layerList,
+          expanded: false,
+          expandTooltip: "Layer List",
         });
-
-        // Add the expandable layer list widget to the top-left corner
         view.ui.add(layerListExpand, "top-left");
       });
     </script>
