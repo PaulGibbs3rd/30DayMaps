@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>ArcGIS JS 4.31 - Globe Example with Car Make/Model and Mileage Input</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/calcite-components/1.0.0-beta.83/calcite.css">
+    <script src="https://js.arcgis.com/4.31/"></script>
+    <script type="module" src="https://js.arcgis.com/calcite-components/1.0.0-beta.83/calcite.esm.js"></script>
+    <script nomodule="" src="https://js.arcgis.com/calcite-components/1.0.0-beta.83/calcite.js"></script>
+    <style>
+        html, body, #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+        #inputDialog {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 999;
+        }
+        #newRecordButton {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        #progressBarContainer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #f3f3f3;
+            display: flex;
+            align-items: center;
+        }
+        #progressBar {
+            width: 0%;
+            height: 20px;
+            background-color: #4caf50;
+        }
+        #moonImage {
+            height: 40px;
+            margin-left: 10px;
+        }
+    </style>
+    <script>
+        require([
+            "esri/Map", "esri/views/SceneView", "esri/layers/FeatureLayer", "esri/Graphic", "esri/geometry/Point", "esri/geometry/Polyline", "esri/widgets/LayerList"
+        ], function(Map, SceneView, FeatureLayer, Graphic, Point, Polyline, LayerList) {
+            // Create the map with basemap set to 'satellite'
+            var map = new Map({
+                basemap: "satellite",
+                ground: "world-elevation"
+            });
+
+            // Create the SceneView to show the globe
+            var view = new SceneView({
+                container: "viewDiv",
+                map: map,
+                scale: 50000000, // Sets the initial scale to view the globe
+                center: [0, 0] // Longitude, latitude to center the view
+            });
+
+            const distanceToMoonMiles = 238855; // Average distance to the moon in miles
+
+            // Function to update the progress bar based on mileage entered
+            function updateProgressBar(mileage) {
+                const progressPercentage = Math.min((mileage / distanceToMoonMiles) * 100, 100);
+                document.getElementById("progressBar").style.width = progressPercentage + "%";
+            }
+
+            // Function to create a feature layer for a car
+            function createFeatureLayer(carName, mileage) {
+                const startPoint = new Point({
+                    longitude: 0,
+                    latitude: 0
+                });
+                const distanceInMeters = mileage * 1609.34; // Convert mileage to meters
+                const randomAngle = Math.random() * 360; // Random angle between 0-360 degrees
+
+                // Calculate the endpoint using trigonometry and convert to latitude and longitude
+                const earthRadius = 6371000; // Earth radius in meters
+                const angleRadians = randomAngle * (Math.PI / 180); // Convert angle to radians
+
+                const deltaLat = (distanceInMeters * Math.cos(angleRadians)) / earthRadius * (180 / Math.PI);
+                const deltaLon = (distanceInMeters * Math.sin(angleRadians)) / (earthRadius * Math.cos(startPoint.latitude * Math.PI / 180)) * (180 / Math.PI);
+                
+                const endpoint = new Point({
+                    latitude: startPoint.latitude + deltaLat,
+                    longitude: startPoint.longitude + deltaLon
+                });
+
+                // Create a polyline from the start point to the endpoint
+                const line = new Polyline({
+                    paths: [
+                        [startPoint.longitude, startPoint.latitude],
+                        [endpoint.longitude, endpoint.latitude]
+                    ]
+                });
+
+                const featureLayer = new FeatureLayer({
+                    source: [
+                        {
+                            geometry: line,
+                            attributes: {
+                                ObjectID: 1,
+                                Name: carName,
+                                Mileage: mileage
+                            }
+                        }
+                    ],
+                    fields: [
+                        {
+                            name: "ObjectID",
+                            alias: "ObjectID",
+                            type: "oid"
+                        },
+                        {
+                            name: "Name",
+                            alias: "Name",
+                            type: "string"
+                        },
+                        {
+                            name: "Mileage",
+                            alias: "Mileage",
+                            type: "double"
+                        }
+                    ],
+                    objectIdField: "ObjectID",
+                    geometryType: "polyline",
+                    renderer: {
+                        type: "simple",
+                        symbol: {
+                            type: "simple-line",
+                            color: [255, 0, 0],
+                            width: 2
+                        }
+                    },
+                    popupTemplate: {
+                        title: "{Name}",
+                        content: "Mileage: {Mileage} miles"
+                    },
+                    title: carName
+                });
+
+                map.add(featureLayer);
+            }
+
+            // Create sample feature layers
+            createFeatureLayer("Fiat 500e", 50000);
+            createFeatureLayer("Tesla Model 3", 100000);
+            createFeatureLayer("Toyota Highlander", 250000);
+
+            // LayerList widget to control layers
+            const layerList = new LayerList({
+                view: view
+            });
+            view.ui.add(layerList, {
+                position: "bottom-right"
+            });
+
+            // Function to draw a new client-side feature layer based on user input
+            document.getElementById("confirmButton").addEventListener("click", function() {
+                const carMake = document.getElementById("carMake").value;
+                const carModel = document.getElementById("carModel").value;
+                const carYear = document.getElementById("carYear").value;
+                const mileage = document.getElementById("mileage").value;
+
+                if (carMake && carModel && carYear && mileage) {
+                    const carName = `${carMake} ${carModel} (${carYear})`;
+                    document.getElementById("inputDialog").style.display = "none";
+                    createFeatureLayer(carName, mileage);
+                    updateProgressBar(mileage); // Update progress bar based on mileage
+
+                    // Clear form inputs
+                    document.getElementById("carMake").value = "";
+                    document.getElementById("carModel").value = "";
+                    document.getElementById("carYear").value = "";
+                    document.getElementById("mileage").value = "";
+                } else {
+                    alert("Please enter car make, model, year, and mileage.");
+                }
+            });
+
+            // Add event listener for the Add New Car button
+            document.getElementById("newRecordButton").addEventListener("click", function() {
+                document.getElementById("inputDialog").style.display = "block";
+                document.getElementById("progressBar").style.width = "0%"; // Reset progress bar
+            });
+        });
+    </script>
+</head>
+<body>
+    <div id="viewDiv"></div>
+    <calcite-button id="newRecordButton" appearance="solid" color="blue">Add New Car</calcite-button>
+
+    <div id="inputDialog">
+        <calcite-panel heading="Enter Car Make, Model, Year, and Mileage">
+            <calcite-label>
+                Car Make
+                <calcite-input id="carMake" type="text" placeholder="e.g., Toyota"></calcite-input>
+            </calcite-label>
+            <calcite-label>
+                Car Model
+                <calcite-input id="carModel" type="text" placeholder="e.g., Corolla"></calcite-input>
+            </calcite-label>
+            <calcite-label>
+                Car Year
+                <calcite-input id="carYear" type="number" placeholder="e.g., 2020"></calcite-input>
+            </calcite-label>
+            <calcite-label>
+                Mileage (in miles)
+                <calcite-input id="mileage" type="number" placeholder="e.g., 100"></calcite-input>
+            </calcite-label>
+            <calcite-button id="confirmButton" appearance="solid" color="blue">Submit</calcite-button>
+        </calcite-panel>
+    </div>
+
+    <div id="progressBarContainer">
+        <div id="progressBar"></div>
+        <img id="moonImage" src="https://i.pinimg.com/736x/07/cb/13/07cb137eb8e9dc533a9ecade295ad606.jpg" alt="Moon">
+    </div>
+</body>
+</html>
