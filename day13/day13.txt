@@ -1,0 +1,1 @@
+installed arcgis sdk for flutter 
