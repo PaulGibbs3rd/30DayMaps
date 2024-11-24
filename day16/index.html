@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Choropleth Map</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.31/"></script>
+  <style>
+    html, body, #viewDiv {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #toggleButtons {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      gap: 10px;
+      background: white;
+      padding: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      border-radius: 5px;
+    }
+    #toggleButtons img {
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: 5px;
+    }
+    #toggleButtons img.active {
+      border-color: #0079c1;
+    }
+  </style>
+</head>
+<body>
+  <div id="viewDiv"></div>
+  <div id="toggleButtons">
+    <img id="beerIcon" src="https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day16/beer.png" alt="Beer Icon" title="View Breweries" class="active">
+    <img id="whiskeyIcon" src="https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day16/whiskey.png" alt="Whiskey Icon" title="View Distilleries">
+  </div>
+
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/layers/FeatureLayer",
+      "esri/widgets/Legend"
+    ], function (Map, MapView, FeatureLayer, Legend) {
+
+      const featureServiceUrl = "https://services7.arcgis.com/qp1aCwLndloqH0vh/arcgis/rest/services/USA_States_Generalized_with_drinking/FeatureServer/0";
+
+      // Define Beer Renderer
+      const beerRenderer = {
+        type: "simple",
+        symbol: {
+          type: "simple-fill",
+          outline: {
+            color: "gray",
+            width: 0.5
+          }
+        },
+        visualVariables: [
+          {
+            type: "color",
+            field: "Number_of_Breweries",
+            stops: [
+              { value: 0, color: "#f7e5b7", label: "0" },
+              { value: 20, color: "#f3d08b", label: "20" },
+              { value: 50, color: "#d5b86e", label: "50" },
+              { value: 80, color: "#b68151", label: "80" },
+              { value: 120, color: "#a15f3b", label: "120" },
+              { value: 160, color: "#613217", label: "160+" }
+            ]
+          }
+        ]
+      };
+
+      // Define Distilleries Renderer
+      const distilleriesRenderer = {
+        type: "simple",
+        symbol: {
+          type: "simple-fill",
+          outline: {
+            color: "gray",
+            width: 0.5
+          }
+        },
+        visualVariables: [
+          {
+            type: "color",
+            field: "Number_of_Distilleries",
+            stops: [
+              { value: 0, color: "#ffffff", label: "0" },
+              { value: 10, color: "#ffe5b4", label: "10" },
+              { value: 25, color: "#ffcc99", label: "25" },
+              { value: 40, color: "#ff9900", label: "40" },
+              { value: 60, color: "#cc6600", label: "60" },
+              { value: 80, color: "#993300", label: "80+" }
+            ]
+          }
+        ]
+      };
+
+      // Popup Template
+      const popupTemplate = {
+        title: "{State_Name}",
+        content: `
+          <ul>
+            <li><b>Number of Breweries:</b> {Number_of_Breweries}</li>
+            <li><b>Number of Distilleries:</b> {Number_of_Distilleries}</li>
+          </ul>
+        `
+      };
+
+      // Create Feature Layer
+      const featureLayer = new FeatureLayer({
+        url: featureServiceUrl,
+        title: "Breweries and Distilleries",
+        popupTemplate: popupTemplate
+      });
+
+      // Create Map
+      const map = new Map({
+        basemap: "streets-navigation-vector",
+        layers: [featureLayer]
+      });
+
+      // Create MapView
+      const view = new MapView({
+        container: "viewDiv",
+        map: map,
+        center: [-98, 39],
+        zoom: 4,
+        ui: {
+          components: ["attribution"] // Remove the zoom controls
+        }
+      });
+
+      // Add Legend Widget
+      const legend = new Legend({
+        view: view,
+        layerInfos: [{
+          layer: featureLayer,
+          title: "Breweries and Distilleries"
+        }]
+      });
+
+      view.ui.add(legend, "bottom-right");
+
+      // Add interactivity for toggling layers
+      const beerIcon = document.getElementById("beerIcon");
+      const whiskeyIcon = document.getElementById("whiskeyIcon");
+
+      function setRenderer(rendererType) {
+        if (rendererType === "beer") {
+          featureLayer.renderer = beerRenderer;
+          beerIcon.classList.add("active");
+          whiskeyIcon.classList.remove("active");
+        } else if (rendererType === "whiskey") {
+          featureLayer.renderer = distilleriesRenderer;
+          whiskeyIcon.classList.add("active");
+          beerIcon.classList.remove("active");
+        }
+      }
+
+      beerIcon.addEventListener("click", () => setRenderer("beer"));
+      whiskeyIcon.addEventListener("click", () => setRenderer("whiskey"));
+
+      // Set initial renderer to beer
+      view.when(() => setRenderer("beer"));
+    });
+  </script>
+</body>
+</html>
