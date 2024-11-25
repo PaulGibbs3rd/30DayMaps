@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>ArcGIS Maps SDK for JavaScript: Add a vector tile layer</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.30/"></script>
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+    <script>
+      require([
+        "esri/config",
+        "esri/Map",
+        "esri/layers/VectorTileLayer",
+        "esri/views/MapView"
+      ], function (esriConfig, Map, VectorTileLayer, MapView) {
+        const vtlLayer = new VectorTileLayer({
+          url: "https://vectortileservices7.arcgis.com/qp1aCwLndloqH0vh/arcgis/rest/services/ParcelsForPainting/VectorTileServer",
+          popupTemplate: {
+            title: "Parcel Information",
+            content: "<b>Parcel ID:</b> {OBJECTID}<br><b>Project A:</b> {AProject}<br><b>Project 2:</b> {Project2}"
+          }
+        });
+
+        const map = new Map({
+          basemap: "osm",
+          layers: [vtlLayer]
+        });
+
+        const view = new MapView({
+          container: "viewDiv",
+          map: map,
+          zoom: 13
+        });
+
+        // Wait for the layer to load, then center the view on it
+        vtlLayer.when(() => {
+          view.goTo(vtlLayer.fullExtent);
+        });
+
+        // Function to apply paint properties using setPaintProperties
+        function applyPaintProperties(attribute) {
+          let paintProperties;
+          if (attribute === "AProject") {
+            paintProperties = {
+              "fill-color": {
+                "property": attribute,
+                "default": "#FFEDA0",
+                "stops": [
+                  [0, "#FF453A"],
+                  [1, "#74B566"],
+                  [2, "#FF9F0A"]
+                ]
+              },
+              "fill-outline-color": "#6E6E6E"
+            };
+          } else if (attribute === "Project2") {
+            paintProperties = {
+              "fill-color": {
+                "property": attribute,
+                "default": "#D3D3D3",
+                "stops": [
+                  [0, "#1E90FF"],
+                  [1, "#32CD32"],
+                  [2, "#FFD700"]
+                ]
+              },
+              "fill-outline-color": "#000000"
+            };
+          }
+
+          vtlLayer.load().then(() => {
+            vtlLayer.setPaintProperties("Parcels_APN_Only", paintProperties);
+            console.log("Custom paint properties applied successfully.");
+          }).catch((error) => {
+            console.error("Failed to apply paint properties:", error);
+          });
+        }
+
+        // Function to restore default styling using setPaintProperties
+        function restoreDefaultStyle() {
+          const defaultPaintProperties = {
+            "fill-color": "#FCD2FC",
+            "fill-outline-color": "#6E6E6E"
+          };
+
+          vtlLayer.load().then(() => {
+            vtlLayer.setPaintProperties("Parcels_APN_Only", defaultPaintProperties);
+            console.log("Default style restored successfully.");
+          }).catch((error) => {
+            console.error("Failed to restore default style:", error);
+          });
+        }
+
+        // Add a dropdown menu to the interface
+        const dropdown = document.createElement('select');
+        dropdown.id = 'attributeDropdown';
+        dropdown.innerHTML = `
+          <option value="">Select Attribute</option>
+          <option value="AProject">AProject</option>
+          <option value="Project2">Project2</option>
+        `;
+        document.body.insertBefore(dropdown, document.getElementById('viewDiv'));
+
+        // Set up event listener for attribute dropdown selection
+        dropdown.addEventListener('change', function() {
+          const selectedAttribute = dropdown.value;
+          if (selectedAttribute) {
+            applyPaintProperties(selectedAttribute);
+          }
+        });
+
+        // Add a button to restore the default style
+        const restoreButton = document.createElement('button');
+        restoreButton.id = 'restoreButton';
+        restoreButton.textContent = 'Restore Default Styling';
+        document.body.insertBefore(restoreButton, document.getElementById('viewDiv'));
+
+        // Set up event listener for restore button
+        restoreButton.addEventListener('click', function() {
+          restoreDefaultStyle();
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>
