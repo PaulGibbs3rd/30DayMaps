@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive Globe with PAUL GIBBS</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/4.31/"></script>
+  <style>
+    html, body, #viewDiv {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    .ui-container {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      z-index: 999;
+    }
+    .ui-container img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border 0.3s ease;
+    }
+    .ui-container img:hover,
+    .ui-container img.selected {
+      border: 2px solid blue;
+    }
+  </style>
+</head>
+<body>
+  <div id="viewDiv"></div>
+  <div class="ui-container" id="uiContainer"></div>
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/SceneView",
+      "esri/Graphic",
+      "esri/layers/GraphicsLayer",
+      "esri/geometry/Point"
+    ], function (Map, SceneView, Graphic, GraphicsLayer, Point) {
+      const locations = [
+        {
+          letter: "P",
+          coordinates: [134.3876, 68.2151],
+          imageUrl: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day19/p_0.jpg",
+          title: "Mackenzie River Delta, Canada",
+        },
+        {
+          letter: "A",
+          coordinates: [-89.3408, 36.5891],
+          imageUrl: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day19/a_0.jpg",
+          title: "Hickman, Kentucky",
+        },
+        {
+          letter: "U",
+          coordinates: [-105.7708, 41.3239],
+          imageUrl: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day19/u_1.jpg",
+          title: "Bamforth National Wildlife Refuge, Wyoming",
+        },
+        {
+          letter: "L",
+          coordinates: [-104.2876, 50.1977],
+          imageUrl: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day19/l_2.jpg",
+          title: "Regina, Saskatchewan, Canada",
+        },
+        {
+          letter: "G",
+          coordinates: [-66.2788, -2.4419],
+          imageUrl: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day19/g_0.jpg",
+          title: "Fonte Boa, Amazonas",
+        },
+        {
+          letter: "I",
+          coordinates: [-16.827, 64.8531],
+          imageUrl: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day19/i_4.jpg",
+          title: "Holuhraun Ice Field, Iceland",
+        },
+        {
+          letter: "B",
+          coordinates: [-62.9214, -7.6167],
+          imageUrl: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day19/b_1.jpg",
+          title: "Humaitá, Brazil",
+        },
+        {
+          letter: "B",
+          coordinates: [-93.0546, 35.1447],
+          imageUrl: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day19/b_0.jpg",
+          title: "Holla Bend, Arkansas",
+        },
+        {
+          letter: "S",
+          coordinates: [15.0628, 12.0077],
+          imageUrl: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day19/s_1.jpg",
+          title: "N’Djamena, Chad",
+        },
+      ];
+
+      const map = new Map({
+        basemap: "satellite",
+        ground: "world-elevation",
+      });
+
+const view = new SceneView({
+  container: "viewDiv",
+  map: map,
+  viewingMode: "global",
+  camera: {
+    position: {
+      latitude: 30,
+      longitude: 0,
+      z: 20000000,
+    },
+    tilt: 0,
+  },
+  ui: {
+    components: ["attribution"], // Keep only the attribution widget
+  },
+});
+
+
+      const graphicsLayer = new GraphicsLayer();
+      map.add(graphicsLayer);
+
+      const uiContainer = document.getElementById("uiContainer");
+
+      locations.forEach((location, index) => {
+        // Add a graphic for each location
+        const point = new Point({
+          longitude: location.coordinates[0],
+          latitude: location.coordinates[1],
+        });
+
+        const graphic = new Graphic({
+          geometry: point,
+          symbol: {
+            type: "simple-marker",
+            style: "circle",
+            color: "blue",
+            size: "8px",
+          },
+          attributes: {
+            title: location.title,
+          },
+        });
+
+        graphicsLayer.add(graphic);
+
+        // Create an image element for the UI
+        const img = document.createElement("img");
+        img.src = location.imageUrl;
+        img.alt = location.title;
+        img.title = location.letter;
+        img.addEventListener("click", () => {
+          // Clear previous selection
+          document
+            .querySelectorAll(".ui-container img")
+            .forEach((el) => el.classList.remove("selected"));
+          img.classList.add("selected");
+
+          // Zoom to location
+          view.goTo(
+            {
+              target: point,
+              zoom: 10,
+            },
+            { duration: 1000 }
+          );
+        });
+
+        uiContainer.appendChild(img);
+      });
+    });
+  </script>
+</body>
+</html>
