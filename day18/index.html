@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clip WebScene to Extent with Popups</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.31/"></script>
+</head>
+<body>
+    <div id="viewDiv" style="width: 100%; height: 100vh;"></div>
+    <script>
+        require([
+            "esri/WebScene",
+            "esri/views/SceneView",
+            "esri/geometry/Extent"
+        ], (WebScene, SceneView, Extent) => {
+            // Create the WebScene
+            const webScene = new WebScene({
+                portalItem: {
+                    id: "d3d6d8c43117498fa53cf51cbcb140c4" // Replace with your WebScene ID
+                }
+            });
+
+            // Create the SceneView
+            const view = new SceneView({
+                container: "viewDiv",
+                map: webScene
+            });
+
+            // Define the clipping extent
+            const clippingExtent = new Extent({
+                xmin: -122.3343534, // Left (Longitude)
+                ymin: 47.6185608,  // Bottom (Latitude)
+                xmax: -122.3291247, // Right (Longitude)
+                ymax: 47.6245243,  // Top (Latitude)
+                spatialReference: {
+                    wkid: 4326 // WGS 84
+                }
+            });
+
+            view.when(() => {
+                // Apply the clipping extent
+                view.clippingArea = clippingExtent;
+
+                // Enable popups
+                view.popup.defaultPopupTemplateEnabled = true;
+
+                // Add click event listener for custom popups
+                view.on("click", (event) => {
+                    // HitTest to identify features at the click location
+                    view.hitTest(event).then((response) => {
+                        const results = response.results;
+
+                        if (results.length > 0) {
+                            // Select the topmost result
+                            const graphic = results[0].graphic;
+
+                            // Display the popup
+                            view.popup.open({
+                                title: "Feature Information",
+                                content: graphic.get("attributes") 
+                                    ? JSON.stringify(graphic.get("attributes"), null, 2) 
+                                    : "No attributes available.",
+                                location: event.mapPoint
+                            });
+                        } else {
+                            // Close the popup if no feature is found
+                            view.popup.close();
+                        }
+                    });
+                });
+
+                console.log("View clipped to extent with popups enabled");
+            }).catch((err) => {
+                console.error("Error setting clipping area or enabling popups: ", err);
+            });
+        });
+    </script>
+</body>
+</html>
