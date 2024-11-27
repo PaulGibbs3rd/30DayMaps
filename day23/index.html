@@ -1,0 +1,89 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>ElevationProfile Widget | Laughlin, NV | ArcGIS Maps SDK for JavaScript 4.31</title>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+
+      .esri-elevation-profile.esri-component.esri-widget--panel {
+        width: 350px !important;
+      }
+    </style>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.31/"></script>
+
+    <script>
+      require(["esri/Map", "esri/views/SceneView", "esri/widgets/ElevationProfile", "esri/layers/SceneLayer"], (
+        Map,
+        SceneView,
+        ElevationProfile,
+        SceneLayer
+      ) => {
+        // create a 3D basemap with the OpenStreetMap 3D Buildings layer
+        const basemap = new Map({
+          basemap: "topo-vector",
+          ground: "world-elevation"
+        });
+
+        // add the OpenStreetMap 3D Buildings layer
+        const osm3DLayer = new SceneLayer({
+          url: "https://basemaps3d.arcgis.com/arcgis/rest/services/OpenStreetMap3D_Buildings_v1/SceneServer"
+        });
+        basemap.add(osm3DLayer);
+
+        // create the scene view
+        const view = new SceneView({
+          container: "viewDiv",
+          map: basemap,
+          camera: {
+            position: {
+              spatialReference: { latestWkid: 4326, wkid: 4326 },
+              longitude: -114.573,
+              latitude: 35.1678,
+              z: 1000 // Elevation in meters
+            },
+            heading: 0,
+            tilt: 60
+          }
+        });
+
+        // create the elevation profile widget
+        const elevationProfile = new ElevationProfile({
+          view: view,
+          // configure widget with desired profile lines
+          profiles: [
+            {
+              type: "ground" // first profile line samples the ground elevation
+            },
+            {
+              type: "view" // second profile samples the view and shows building profiles
+            }
+          ],
+          // hide the select button
+          // this button can be displayed when there are polylines in the
+          // scene to select and display the elevation profile for
+          visibleElements: {
+            selectButton: false
+          }
+        });
+
+        // add the widget to the view
+        view.ui.add(elevationProfile, "top-right");
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>
