@@ -2,7 +2,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-    <title>Bookmark and Basemap Gallery Widgets | Laughlin, NV | ArcGIS Maps SDK for JavaScript 4.31</title>
+    <title>Basemap Gallery and Bookmarks Widgets | Laughlin, NV | ArcGIS Maps SDK for JavaScript 4.31</title>
 
     <style>
       html,
@@ -19,29 +19,26 @@
     <script src="https://js.arcgis.com/4.31/"></script>
 
     <script>
-      require(["esri/Map", "esri/views/SceneView", "esri/widgets/Bookmark", "esri/widgets/BasemapGallery", "esri/layers/SceneLayer"], (
-        Map,
+      require([
+        "esri/WebScene", "esri/views/SceneView", "esri/widgets/BasemapGallery", "esri/widgets/Expand"
+      ], (
+        WebScene,
         SceneView,
-        Bookmark,
         BasemapGallery,
-        SceneLayer
+        Expand
+      
       ) => {
-        // create a 3D basemap with the OpenStreetMap 3D Buildings layer
-        const basemap = new Map({
-          basemap: "topo-vector",
-          ground: "world-elevation"
+        // create a webscene using the provided item ID
+        const webscene = new WebScene({
+          portalItem: {
+            id: "199c278ea7d04a3997bbfb223c31f4fb"
+          }
         });
-
-        // add the OpenStreetMap 3D Buildings layer
-        const osm3DLayer = new SceneLayer({
-          url: "https://basemaps3d.arcgis.com/arcgis/rest/services/OpenStreetMap3D_Buildings_v1/SceneServer"
-        });
-        basemap.add(osm3DLayer);
 
         // create the scene view
         const view = new SceneView({
           container: "viewDiv",
-          map: basemap,
+          map: webscene,
           camera: {
             position: {
               spatialReference: { latestWkid: 4326, wkid: 4326 },
@@ -54,19 +51,23 @@
           }
         });
 
-        // create the bookmark widget
-        const bookmarkWidget = new Bookmark({
-          view: view
-        });
-
         // create the basemap gallery widget
         const basemapGallery = new BasemapGallery({
           view: view
         });
 
+        // create an expand widget for the basemap gallery
+        const basemapGalleryExpand = new Expand({
+          view: view,
+          content: basemapGallery
+        });
+
+        // create the bookmarks widget
+       
+
         // add the widgets to the view
-        view.ui.add(bookmarkWidget, "top-right");
-        view.ui.add(basemapGallery, "top-right");
+        view.ui.add(basemapGalleryExpand, "top-right");
+        
       });
     </script>
   </head>
