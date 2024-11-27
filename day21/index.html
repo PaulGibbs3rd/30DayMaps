@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US-Canada Border Dispute Map</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.31/"></script>
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+        #intersectButton {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 99;
+            padding: 10px;
+            background: white;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        #featureTableDiv {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            z-index: 99;
+            width: 100%;
+            max-height: 400px;
+            overflow: auto;
+            background: white;
+        }
+        #iframeContainer {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 400px;
+            height: 400px;
+            z-index: 99;
+            border: 1px solid #ccc;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="viewDiv"></div>
+    <button id="intersectButton">Highlight Overlap</button>
+    <div id="iframeContainer">
+        <iframe src="https://en.wikipedia.org/wiki/Strait_of_Juan_de_Fuca#Boundary_dispute"></iframe>
+    </div>
+    
+    <script>
+        // Import necessary ArcGIS modules
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer",
+            "esri/geometry/Extent",
+            "esri/widgets/Legend",
+            "esri/geometry/geometryEngine",
+            "esri/Graphic",
+            "esri/layers/GraphicsLayer"
+        ], function (Map, MapView, FeatureLayer, Extent, Legend, geometryEngine, Graphic, GraphicsLayer) {
+            // Create the map
+            var map = new Map({
+                basemap: "topo-vector"
+            });
+
+            // Create a MapView
+            var view = new MapView({
+                container: "viewDiv",
+                map: map,
+                center: [-124.0, 48.5], // center the map on the Strait of Juan de Fuca
+                zoom: 8,
+                ui: {
+                    components: ["attribution"] // Remove zoom control by specifying only the "attribution" component
+                }
+            });
+
+            // Define the extent of the area of interest
+            var extent = new Extent({
+                xmin: -125.0,
+                ymin: 48.0,
+                xmax: -123.0,
+                ymax: 49.0,
+                spatialReference: 4326
+            });
+
+            // Set the view's extent to highlight the overlap area
+            view.extent = extent;
+
+            // Define the Washington state boundary layer
+            var waStateBoundaryLayer = new FeatureLayer({
+                url: "https://gis.dnr.wa.gov/site3/rest/services/Public_Boundaries/WADNR_PUBLIC_Cadastre_OpenData/MapServer/10",
+                title: "Washington State Boundary",
+                opacity: 0.5,
+                outFields: ["*"],
+                popupTemplate: {
+                    title: "Washington State Boundary",
+                    content: "<p>{*}</p>"
+                }
+            });
+
+            // Define the British Columbia boundary layer
+            var bcBoundaryLayer = new FeatureLayer({
+                url: "https://maps.gov.bc.ca/arcgis/rest/services/whse/bcgw_pub_whse_basemapping/MapServer/101",
+                visible: true,
+                title: "British Columbia Boundary",
+                opacity: 0.5,
+                outFields: ["*"],
+                definitionExpression: "STATUS IN ('Province', 'Canadian Waters')",
+                popupTemplate: {
+                    title: "British Columbia Boundary",
+                    content: "<p>{*}</p>"
+                }
+            });
+
+            // Add the layers to the map
+            map.add(waStateBoundaryLayer);
+            map.add(bcBoundaryLayer);
+
+            // Add a GraphicsLayer for the overlap area
+            var overlapLayer = new GraphicsLayer();
+            map.add(overlapLayer);
+
+            // Add a legend to help with distinguishing between layers
+            var legend = new Legend({
+                view: view
+            });
+            view.ui.add(legend, "bottom-right");
+
+            // Variable to store the selected feature
+            var selectedFeature = null;
+
+            // Click event to select a feature
+            view.on("click", function (event) {
+                view.hitTest(event).then(function (response) {
+                    var results = response.results;
+                    if (results.length > 0) {
+                        var graphic = results.filter(function (result) {
+                            return result.graphic.layer === waStateBoundaryLayer || result.graphic.layer === bcBoundaryLayer;
+                        })[0];
+
+                        if (graphic) {
+                            selectedFeature = graphic.graphic;
+                            console.log("Feature selected: ", selectedFeature);
+                        }
+                    }
+                });
+            });
+
+            // Function to highlight the overlap area between the selected feature and nearby features
+            function highlightOverlap() {
+                console.log("Highlight Overlap button clicked.");
+                // Clear any previous overlap graphics
+                overlapLayer.removeAll();
+
+                if (!selectedFeature) {
+                    console.error("No feature selected. Please click on a feature first.");
+                    return;
+                }
+
+                // Query nearby features in both layers
+                var waQuery = waStateBoundaryLayer.createQuery();
+                waQuery.geometry = selectedFeature.geometry.extent.expand(1.5);
+                waQuery.returnGeometry = true;
+
+                var bcQuery = bcBoundaryLayer.createQuery();
+                bcQuery.geometry = selectedFeature.geometry.extent.expand(1.5);
+                bcQuery.returnGeometry = true;
+
+                Promise.all([waStateBoundaryLayer.queryFeatures(waQuery), bcBoundaryLayer.queryFeatures(bcQuery)]).then(function(results) {
+                    var nearbyFeatures = results[0].features.concat(results[1].features);
+
+                    if (nearbyFeatures.length === 0) {
+                        console.error("No nearby features found.");
+                        return;
+                    }
+
+                    var intersectedFeatures = [];
+
+                    // Compute intersections for the selected feature with each nearby feature
+                    nearbyFeatures.forEach(function(feature) {
+                        if (feature.geometry) {
+                            var intersection = geometryEngine.intersect(selectedFeature.geometry, feature.geometry);
+                            if (intersection) {
+                                console.log("Intersection found, adding to overlap layer.");
+                                var overlapGraphic = new Graphic({
+                                    geometry: intersection,
+                                    symbol: {
+                                        type: "simple-fill",
+                                        color: [34, 139, 34, 0.6], // Green with transparency
+                                        outline: {
+                                            color: [255, 255, 255, 1],
+                                            width: 1.5
+                                        }
+                                    }
+                                });
+                                overlapLayer.add(overlapGraphic);
+                                intersectedFeatures.push(overlapGraphic);
+                            } else {
+                                console.log("No intersection geometry created.");
+                            }
+                        }
+                    });
+
+                    
+                }).catch(function(error) {
+                    console.error("Error querying features: ", error);
+                });
+            }
+
+            // Add event listener to the button
+            document.getElementById("intersectButton").addEventListener("click", highlightOverlap);
+        });
+    </script>
+</body>
+</html>
