@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArcGIS JS State Map</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.31/"></script>
+    <style>
+        html, body, #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <script>
+        require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer"], function(Map, MapView, FeatureLayer) {
+            // Create the map
+            var map = new Map({
+                basemap: "streets-navigation-vector"
+            });
+
+            // Create the view
+            var view = new MapView({
+                container: "viewDiv",
+                map: map,
+                center: [-98.5795, 39.8283], // Center of the USA
+                zoom: 4
+            });
+
+            // Define renderer for the USA States layer
+            var renderer = {
+                type: "unique-value",  // Type of renderer
+                field: "State",  // Field to symbolize based on
+                uniqueValueInfos: [
+                    // Coke states
+                    { value: "Georgia", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/coke.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "Alabama", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/coke.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "California", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/coke.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "Illinois", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/coke.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "Maryland", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/coke.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "Massachusetts", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/coke.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "Minnesota", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/coke.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "New Jersey", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/coke.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "New York", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/coke.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "Ohio", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/coke.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "Oregon", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/coke.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "South Carolina", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/coke.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "Wisconsin", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/coke.png?raw=true", outline: { color: "black", width: 1 } } },
+                    // Pepsi states
+                    { value: "Colorado", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/pepsi.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "Delaware", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/pepsi.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "Hawaii", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/pepsi.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "Indiana", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/pepsi.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "Kansas", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/pepsi.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "North Carolina", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/pepsi.png?raw=true", outline: { color: "black", width: 1 } } },
+                    { value: "Pennsylvania", symbol: { type: "picture-fill", url: "https://github.com/PaulGibbs3rd/30DayMaps/blob/main/day22/pepsi.png?raw=true", outline: { color: "black", width: 1 } } },
+                    // Neither states
+                    { value: "Washington", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Alaska", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Florida", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Maine", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Arkansas", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Iowa", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Montana", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Nevada", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "New Hampshire", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "North Dakota", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "South Dakota", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Tennessee", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "West Virginia", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Wyoming", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Utah", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Vermont", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Nebraska", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Michigan", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Arizona", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Idaho", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Missouri", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "New Mexico", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Oklahoma", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Texas", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Kentucky", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Connecticut", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Rhode Island", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } },
+                    { value: "Virginia", symbol: { type: "simple-fill", color: "grey", outline: { color: "black", width: 1 } } }
+                ]
+            };
+
+            // Define the feature layer for the USA States
+            var featureLayer = new FeatureLayer({
+                url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_States_Generalized_Boundaries/FeatureServer",
+                renderer: renderer
+            });
+
+            // Add the feature layer to the map
+            map.add(featureLayer);
+        });
+    </script>
+</head>
+<body>
+    <div id="viewDiv"></div>
+</body>
+</html>
