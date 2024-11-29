@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIIRS Fire Radiative Power Heatmap</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.31/"></script>
+    <style>
+        html, body, #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="viewDiv"></div>
+    <script>
+        // Import required modules from ArcGIS JS API
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer",
+            "esri/renderers/HeatmapRenderer"
+        ], function(Map, MapView, FeatureLayer, HeatmapRenderer) {
+
+            // Create a heatmap renderer for the Fire Radiative Power (frp) attribute
+            const heatmapRenderer = new HeatmapRenderer({
+                field: "frp", // Attribute to use for heatmap intensity
+                colorStops: [
+                    { ratio: 0, color: "rgba(255, 255, 255, 0)" }, // 0-9 MW
+                    { ratio: 0.01, color: "rgba(255, 255, 204, 0.6)" }, // 10-99 MW
+                    { ratio: 0.1, color: "rgba(255, 255, 0, 0.8)" }, // 100-299 MW
+                    { ratio: 0.4, color: "rgba(255, 153, 51, 0.9)" }, // 300-749 MW
+                    { ratio: 1, color: "rgba(255, 0, 0, 1)" } // >750 MW
+                ],
+                maxPixelIntensity: 1000,
+                minPixelIntensity: 100 // Increase the minimum pixel intensity to reduce noise
+            });
+
+            // Create the FeatureLayer for the Satellite (VIIRS) Thermal Hotspots and Fire Activity
+            const fireLayer = new FeatureLayer({
+                url: "https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/Satellite_VIIRS_Thermal_Hotspots_and_Fire_Activity/FeatureServer/0",
+                renderer: heatmapRenderer, // Apply the heatmap renderer
+                outFields: ["*"],
+                popupTemplate: {
+                    title: "Fire Activity",
+                    content: "<b>Location:</b> [{latitude}, {longitude}]<br/><b>FRP:</b> {frp} MW"
+                },
+                definitionExpression: "frp > 50" // Filter to only show significant hotspots
+            });
+
+            // Create the map and add the fireLayer
+            const map = new Map({
+                basemap: "dark-gray-vector",
+                layers: [fireLayer]
+            });
+
+            // Create a MapView to visualize the map
+            const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                center: [-100, 40], // Center over the US
+                zoom: 4
+            });
+        });
+    </script>
+</body>
+</html>
