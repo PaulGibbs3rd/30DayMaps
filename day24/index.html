@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Pie Chart Renderer with ArcGIS JS API v4.31</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.31/"></script>
+  <style>
+    html, body, #viewDiv {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="viewDiv"></div>
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/layers/FeatureLayer",
+      "esri/widgets/Legend",
+      "esri/PopupTemplate"
+    ], function(Map, MapView, FeatureLayer, Legend, PopupTemplate) {
+
+      // Create the map
+      var map = new Map({
+        basemap: "gray-vector"
+      });
+
+      // Create the view
+      var view = new MapView({
+        container: "viewDiv",
+        map: map,
+        center: [-98.5795, 39.8283], // Center on the United States
+        zoom: 4
+      });
+
+      // Log scale changes to the console
+      view.watch("scale", function(newScale) {
+        console.log("Current Scale: " + newScale);
+      });
+
+      // Define the popup template
+      var popupTemplate = new PopupTemplate({
+        title: "Housing Cost Details",
+        content: [
+          {
+            type: "fields",
+            fieldInfos: [
+              {
+                fieldName: "B25091_003E",
+                label: "Less than 10%",
+                format: {
+                  digitSeparator: true,
+                  places: 0
+                }
+              },
+              {
+                fieldName: "B25091_004E",
+                label: "10% to 14.9%",
+                format: {
+                  digitSeparator: true,
+                  places: 0
+                }
+              },
+              {
+                fieldName: "B25091_005E",
+                label: "15% to 19.9%",
+                format: {
+                  digitSeparator: true,
+                  places: 0
+                }
+              },
+              {
+                fieldName: "B25091_006E",
+                label: "20% to 24.9%",
+                format: {
+                  digitSeparator: true,
+                  places: 0
+                }
+              },
+              {
+                fieldName: "B25091_007E",
+                label: "25% to 29.9%",
+                format: {
+                  digitSeparator: true,
+                  places: 0
+                }
+              },
+              {
+                fieldName: "B25091_008E",
+                label: "30% to 34.9%",
+                format: {
+                  digitSeparator: true,
+                  places: 0
+                }
+              },
+              {
+                fieldName: "B25091_009E",
+                label: "35% to 39.9%",
+                format: {
+                  digitSeparator: true,
+                  places: 0
+                }
+              },
+              {
+                fieldName: "B25091_010E",
+                label: "40% or more",
+                format: {
+                  digitSeparator: true,
+                  places: 0
+                }
+              }
+            ]
+          }
+        ]
+      });
+
+      // Define the renderer separately to avoid linkage between layers
+      var pieChartRenderer = {
+        type: "pie-chart", // autocasts as new PieChartRenderer
+        size: 10,
+        attributes: [
+          {
+            color: "#ed5151",
+            label: "Less than 10%",
+            field: "B25091_003E"
+          },
+          {
+            field: "B25091_004E",
+            color: "#149ece",
+            label: "10% to 14.9%"
+          },
+          {
+            field: "B25091_005E",
+            color: "#a7c636",
+            label: "15% to 19.9%"
+          },
+          {
+            field: "B25091_006E",
+            color: "#ffc107",
+            label: "20% to 24.9%"
+          },
+          {
+            field: "B25091_007E",
+            color: "#ff8c00",
+            label: "25% to 29.9%"
+          },
+          {
+            field: "B25091_008E",
+            color: "#ff6347",
+            label: "30% to 34.9%"
+          },
+          {
+            field: "B25091_009E",
+            color: "#e75480",
+            label: "35% to 39.9%"
+          },
+          {
+            field: "B25091_010E",
+            color: "#8a2be2",
+            label: "40% or more"
+          }
+        ],
+        backgroundSymbol: { // polygon fill behind pie chart
+          color: [127, 127, 127, 0.2],
+          outline: {
+            width: 1,
+            color: [255, 255, 255, 0.3]
+          }
+        },
+        outline: {
+          width: 1.5,
+          color: "white"
+        },
+        visualVariables: [
+          {
+            type: "size", // size visual variable based on population represented in each pie
+            valueExpression:
+              "$feature.B25091_003E + $feature.B25091_004E + $feature.B25091_005E + $feature.B25091_006E + $feature.B25091_007E + $feature.B25091_008E + $feature.B25091_009E + $feature.B25091_010E",
+            minDataValue: 20000,
+            maxDataValue: 500000,
+            minSize: 12,
+            maxSize: 48
+          }
+        ]
+      };
+
+      // Define the feature layers for state, county, and tract with updated extents and correct configurations
+      var stateLayer = new FeatureLayer({
+        url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Housing_Costs_Centroids/FeatureServer/0",
+        renderer: pieChartRenderer,
+        popupTemplate: popupTemplate,
+        maxScale: 3000000, // Visible from 1:10,000,000 to 1:3,000,000 (State Level)
+      });
+
+      var countyLayer = new FeatureLayer({
+        url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Housing_Costs_Centroids/FeatureServer/1",
+        renderer: pieChartRenderer, // Use the same renderer without linkage
+        popupTemplate: popupTemplate,
+        minScale: 3000000, // Visible from 1:2,000,000 to 1:500,000 (County Level)
+        maxScale: 500000 // Visible until zoomed in to state level
+      });
+
+      var tractLayer = new FeatureLayer({
+        url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Housing_Costs_Centroids/FeatureServer/2",
+        renderer: pieChartRenderer, // Use the same renderer without linkage
+        popupTemplate: popupTemplate,
+        minScale: 500000 // Visible from 1:500,000 to 1:100,000 (Census Tract Level)
+      });
+
+      // Add the feature layers to the map
+      map.add(stateLayer);
+      map.add(countyLayer);
+      map.add(tractLayer);
+
+      // Add the legend widget to the view
+      var legend = new Legend({
+        view: view,
+        layerInfos: [
+          {
+            layer: stateLayer,
+            title: "Housing Cost Distribution"
+          },
+          {
+            layer: countyLayer,
+            title: "County Housing Cost Distribution"
+          },
+          {
+            layer: tractLayer,
+            title: "Tract Housing Cost Distribution"
+          }
+        ]
+      });
+
+      view.ui.add(legend, "bottom-left");
+    });
+  </script>
+</body>
+</html>
