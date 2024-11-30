@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Web Scene Viewer</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.31/"></script>
+  <style>
+    html, body, #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+  <script>
+    require(["esri/views/SceneView", "esri/WebScene"], function(SceneView, WebScene) {
+      // Creating a new WebScene instance with the provided ID
+      var webscene = new WebScene({
+        portalItem: {
+          id: "0a7fbb1593f14a8baf258a56a2bafae5"
+        }
+      });
+
+      // Creating a SceneView to display the WebScene
+      var view = new SceneView({
+        container: "viewDiv",
+        map: webscene
+      });
+    });
+  </script>
+</head>
+<body>
+  <div id="viewDiv"></div>
+</body>
+</html>
