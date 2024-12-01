@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Building Clustering Example with Popups</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.31/"></script>
+  <style>
+    html, body, #viewDiv {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #toggleClusterBtn {
+      background-color: white;
+      border: 1px solid #0079c1;
+      color: #0079c1;
+      padding: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    #toggleClusterBtn:hover {
+      background-color: #0079c1;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div id="viewDiv"></div>
+
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/layers/GeoJSONLayer"
+    ], function(Map, MapView, GeoJSONLayer) {
+
+      // Load GeoJSON data for buildings in Rome from GitHub
+      const geojsonUrl = "https://raw.githubusercontent.com/PaulGibbs3rd/30DayMaps/main/day29/rome-roads.geojson";
+
+      // Create GeoJSONLayer for buildings
+      const buildingsLayer = new GeoJSONLayer({
+        url: geojsonUrl,
+        renderer: {
+          type: "simple",
+          symbol: {
+            type: "simple-fill",
+            color: [150, 150, 150, 0.5], // Light gray with transparency
+            outline: {
+              color: [0, 0, 0, 0.5],
+              width: 0.5
+            }
+          }
+        },
+        title: "Buildings in Rome",
+        popupTemplate: {
+          title: "Building Information",
+          content: `
+            <b>Building ID:</b> {id} <br>
+            <b>Building Name:</b> {names.primary} <br>
+            <b>Height:</b> {height} meters <br>
+            <b>Update Time:</b> {update_time} <br>
+            <b>Data Source:</b> {sources[0].dataset} <br>
+          `
+        }
+      });
+
+      const map = new Map({
+        basemap: "streets",
+        layers: [buildingsLayer]
+      });
+
+      const view = new MapView({
+        container: "viewDiv",
+        map: map
+      });
+
+      // Wait until the layer is loaded to set the initial extent
+      buildingsLayer.when(function() {
+        view.extent = buildingsLayer.fullExtent;
+      });
+
+      // Create a cluster configuration for the buildings layer
+      const clusterConfig = {
+        type: "cluster",
+        clusterRadius: "50px",
+        clusterMinSize: "24px",
+        clusterMaxSize: "60px",
+        popupTemplate: {
+          title: "Cluster Summary",
+          content: [{
+            type: "text",
+            text: `This cluster contains {cluster_count} buildings.`
+          }, {
+            type: "text",
+            text: `
+              Click on a cluster to see the buildings.
+              If there is only one building, detailed information will be shown.
+            `
+          }]
+        },
+        labelingInfo: [{
+          deconflictionStrategy: "none",
+          labelExpressionInfo: {
+            expression: "$feature.cluster_count"
+          },
+          symbol: {
+            type: "text",
+            color: "white",
+            font: {
+              weight: "bold",
+              family: "Arial",
+              size: "12px"
+            },
+            haloColor: "black",
+            haloSize: "1px"
+          },
+          labelPlacement: "center-center"
+        }]
+      };
+
+      let clusteringEnabled = false;
+
+      // Create a button for toggling clustering
+      const toggleClusterButton = document.createElement("button");
+      toggleClusterButton.id = "toggleClusterBtn";
+      toggleClusterButton.innerHTML = "Toggle Cluster View";
+      toggleClusterButton.onclick = function() {
+        clusteringEnabled = !clusteringEnabled;
+        buildingsLayer.featureReduction = clusteringEnabled ? clusterConfig : null;
+      };
+
+      // Add the button to the top-left of the view
+      view.ui.add(toggleClusterButton, "top-left");
+    });
+  </script>
+</body>
+</html>
