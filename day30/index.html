@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>30-Day Map Challenge: Final 3D Globe</title>
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.31/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.31/"></script>
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+      #navigationButtons {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+        background-color: white;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      }
+      button {
+        margin: 5px;
+        padding: 10px;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+    <div id="navigationButtons">
+      <button id="prevButton">Previous Day</button>
+      <button id="nextButton">Next Day</button>
+    </div>
+    <script>
+      require([
+        "esri/Map",
+        "esri/views/SceneView",
+        "esri/Graphic",
+        "esri/layers/GraphicsLayer",
+      ], function (Map, SceneView, Graphic, GraphicsLayer) {
+        // Create the map with a basemap and world elevation
+        const map = new Map({
+          basemap: "satellite",
+          ground: "world-elevation",
+        });
+
+        // Create the SceneView for the 3D globe
+        const view = new SceneView({
+          container: "viewDiv",
+          map: map,
+          camera: {
+            position: {
+              x: -90,
+              y: 45,
+              z: 20000000, // Camera elevation in meters
+            },
+            tilt: 0,
+          },
+        });
+
+        // Create a GraphicsLayer to hold all the project points
+        const graphicsLayer = new GraphicsLayer();
+        map.add(graphicsLayer);
+
+        // Define each project's data (coordinates, title, description, link)
+        const projects = [
+          {
+            title: "Day 1: Google Timeline Points Map",
+            description:
+              "A visualization of Google Timeline data since 2019, formatted to GeoJSON using a custom Python script. A great start to an iterative exploration of personal location data.",
+            coordinates: [-122.4194, 37.7749], // San Francisco, CA
+            link: "https://www.linkedin.com/embed/feed/update/urn:li:share:7258227834190471168"
+          },
+          {
+            title: "Day 2: Points to Lines Journey Map",
+            description:
+              "Transitioning points into lines, displaying routes between check-ins with a unique renderer using ArcGIS Pro. Transportation changes are also documented with Python and GeoJSON.",
+            coordinates: [-74.006, 40.7128], // New York City, NY
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day2/"
+          },
+          {
+            title: "Day 3: Boundary Polygons Analysis",
+            description:
+              "Added city, county, and state boundaries to explore stats like 'most check-ins by city' and areas traveled without check-ins. Screenshots cover Southern California, the Bay Area, and Seattle.",
+            coordinates: [-118.2437, 34.0522], // Los Angeles, CA
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day3/"
+          },
+          {
+            title: "Day 4: Hexagonal Binning of Google Timeline",
+            description:
+              "Hex-binning using John Nelson's hexagon layer to group location data into bins. An ArcPy script helps generate reusable hex-bin results.",
+            coordinates: [-122.3321, 47.6062], // Seattle, WA
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day4/"
+          },
+          {
+            title: "Day 5: Moving from Southern California to Seattle",
+            description:
+              "Follow the journey from Southern California to Seattle, with an unexpected stopover in Petaluma, California. Life on the road is documented with heartfelt memories during the move.",
+            coordinates: [-122.7094, 38.2324], // Petaluma, CA
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day5/"
+          },
+          {
+            title: "Day 6: Precipitation Differences Between SoCal and Seattle",
+            description:
+              "Raster data comparing rainfall between SoCal and Seattle. See how the Puget Sound's climate contrasts sharply with the Inland Empire's dryness.",
+            coordinates: [-117.2898, 34.1083], // Inland Empire, CA
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day6/"
+          },
+          {
+            title: "Day 7: GeoJSON with a Vintage Twist",
+            description:
+              "A sepia filter was applied to create a vintage-style web map of personal check-ins. Resting up after a dental procedure, keeping things simple today.",
+            coordinates: [-123.1207, 49.2827], // Vancouver, BC
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day7/"
+          },
+          {
+            title: "Day 8: Palestinian Healthcare Facilities",
+            description:
+              "Visualizing healthcare facilities across Palestine, sourced from the Humanitarian Data Exchange (HDX). This Leaflet app provides a view of facilities that serve people in difficult conditions.",
+            coordinates: [35.2332, 31.9522], // Jerusalem, Palestine
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day8/"
+          },
+          {
+            title: "Day 9: AI-driven 3D Scene of NYC",
+            description:
+              "Worked with ChatGPT to symbolize New York's buildings using a 3D Scene Layer. Created random breakpoints for building height and color assignments with an interactive legend.",
+            coordinates: [-74.006, 40.7128], // New York City, NY
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day9/"
+          },
+          {
+            title: "Day 10: Hand-Drawn Map from the Hospital",
+            description:
+              "A hand-drawn map provided by the hospital staff during my wife's tonsil removal. It helped navigate around the campus to pick her up—maps tell stories in everyday life.",
+            coordinates: [-122.1869, 47.6104], // Overlake Hospital, Bellevue, WA
+            link: "https://www.linkedin.com/embed/feed/update/urn:li:share:7263686273352048641"
+          },
+          {
+            title: "Day 11: Historical Arctic Ice Extent",
+            description:
+              "Explore how the Arctic Ice is receding over time with data from NOAA, visualized in a web app.",
+            coordinates: [0, 90], // Arctic Ocean
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day11/"
+          },
+          {
+            title: "Day 12: Miles Driven vs. Moon Distance",
+            description:
+              "Visualize how much of Earth has been traversed with your vehicle. Has my 250,000-mile Toyota Highlander reached the moon?",
+            coordinates: [-95.7129, 37.0902], // United States
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day12/"
+          },
+          {
+            title: "Day 13: ArcGIS Maps SDK for Flutter",
+            description:
+              "Installed and set up the ArcGIS Maps SDK for Flutter on Mac and iPhone, excited to build iOS mapping applications!",
+            coordinates: [-122.4194, 37.7749], // San Francisco, CA
+            link: "https://www.linkedin.com/posts/paullgibbs_30daymapchallenge-gis-iosdev-activity-7264169305833902081-YdYj?utm_source=share&utm_medium=member_desktop"
+          },
+          {
+            title: "Day 14: ACRONYM Stockists Map",
+            description:
+              "A world map showing the locations of stores that carry ACRONYM GmbH. Fashion, technology, and mapping all united in one project.",
+            coordinates: [13.405, 52.52], // Berlin, Germany
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day14/"
+          },
+          {
+            title: "Day 15: Geocode Custom Stores",
+            description:
+              "A quick entry using ArcPy to geocode store locations. Used my previous project data of fashion stockists for this one.",
+            coordinates: [-0.1278, 51.5074], // London, UK
+            link: "https://www.linkedin.com/embed/feed/update/urn:li:share:7264519191724990464"
+          },
+          {
+            title: "Day 16: Breweries and Distilleries in the US",
+            description:
+              "Choropleth map visualizing how many breweries and distilleries are in each state. A fun and colorful dive into alcohol distribution across the US.",
+            coordinates: [-98.5795, 39.8283], // Center of the United States
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day16/"
+          },
+          {
+            title: "Day 17: Parcel Visualization for Multiple Programs",
+            description:
+              "A vector tile service that displays parcel data and uses a unique value renderer to maintain efficiency. Parcel data from Redlands, CA was used in this sample.",
+            coordinates: [-117.1825, 34.0556], // Redlands, CA
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day17/",
+          },
+          {
+            title: "Day 18: 3D View of Seattle Using Lidar",
+            description:
+              "Compare OSM-based buildings with LiDAR data of Seattle's Cascade neighborhood. Features notable sites like REI and cranes captured mid-construction.",
+            coordinates: [-122.3321, 47.6062], // Seattle, WA
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day18/",
+          },
+          {
+            title: "Day 19: Satellite Typography from NASA",
+            description:
+              "Create your name with Landsat imagery and map out where each letter came from. A unique, artistic way to combine typography and satellite imagery.",
+            coordinates: [-95.7129, 37.0902], // United States
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day19/",
+          },
+          {
+            title: "Day 20: Bicycle Routing App",
+            description:
+              "A Leaflet-based bicycle routing app using Open Street Map data. Could be useful for e-scooter riders or bike kiosks throughout cities!",
+            coordinates: [-0.1278, 51.5074], // London, UK
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day20/",
+          },
+          {
+            title: "Day 21: Strait of Juan de Fuca Border Dispute",
+            description:
+              "Visualize the border conflict between the United States and Canada in the Strait of Juan de Fuca, highlighting overlaps between BC and Washington boundaries.",
+            coordinates: [-123.1193, 48.3833], // Strait of Juan de Fuca
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day21/",
+          },
+          {
+            title: "Day 22: Reproductive Rights in the US",
+            description:
+              "Highlighted Guttmacher Institute’s Interactive Map on access to reproductive care using just two colors. An important look at healthcare accessibility.",
+            coordinates: [-95.7129, 37.0902], // United States
+            link: "https://www.linkedin.com/embed/feed/update/urn:li:share:7267646697885851650",
+          },
+          {
+            title: "Day 23: Childhood Memories of Laughlin, NV",
+            description:
+              "A simple scene showing Laughlin, Nevada—a favorite childhood vacation spot full of adventure, memories, and 4th of July celebrations.",
+            coordinates: [-114.5730, 35.1678], // Laughlin, NV
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day23/",
+          },
+          {
+            title: "Day 24: Housing Costs Visualization",
+            description:
+              "Used the ArcGIS Maps SDK to create an interactive web map using pie charts to show how housing costs follow the 30% rule.",
+            coordinates: [-118.2437, 34.0522], // Los Angeles, CA
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day24/",
+          },
+          {
+            title: "Day 25: Satellite Thermal Hotspots and Fire Detection",
+            description:
+              "Using VIIRS thermal data, this map helps visualize fire hotspots with readings above 50 Radiative Power. Cool technology to detect fires from space!",
+            coordinates: [-63.0, -3.4653], // Amazon Rainforest
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day25/",
+          },
+          {
+            title: "Day 26: Geodesic Buffer Deformation",
+            description:
+              "Interactive app showcasing the deformation of geodesic buffers under different projections like Mercator. Originally inspired by a Reddit post.",
+            coordinates: [-122.4194, 37.7749], // San Francisco, CA
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day26/",
+          },
+          {
+            title: "Day 27: LiDAR Scan of Pier 62, Seattle",
+            description:
+              "Scanned Pier 62 in Seattle with an iPhone and processed it with ArcGIS Pro. Impressed by the iPhone's LiDAR capability!",
+            coordinates: [-122.3406, 47.6071], // Seattle, WA
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day27/",
+          },
+          {
+            title: "Day 28: Maps at Seattle Aquarium",
+            description:
+              "A visit to the Seattle Aquarium featuring conservation maps like mangrove distribution, whale migration routes, and coral. Beautiful maps, beautiful animals.",
+            coordinates: [-122.3406, 47.6071], // Seattle, WA
+            link: "https://www.linkedin.com/posts/paullgibbs_30daymapchallenge-blueplanet-aquarium-activity-7268686904257069056-k-IR?utm_source=share&utm_medium=member_desktop"
+          },
+          {
+            title: "Day 29: Building Density of Rome",
+            description:
+              "Using Overture Maps data to visualize building density in Rome, complete with cluster toggling for a quick glance at urban distribution.",
+            coordinates: [12.4964, 41.9028], // Rome, Italy
+            link: "https://paulgibbs3rd.github.io/30DayMaps/day29/"
+          }
+        ];
+
+        let currentIndex = 0; // Start with Day 1 selected
+
+        // Add a point graphic for each project
+        projects.forEach(function (project) {
+          const point = {
+            type: "point",
+            longitude: project.coordinates[0],
+            latitude: project.coordinates[1],
+          };
+
+          const markerSymbol = {
+            type: "simple-marker",
+            color: "red",
+            outline: {
+              color: "white",
+              width: 1,
+            },
+          };
+
+          const pointGraphic = new Graphic({
+            geometry: point,
+            symbol: markerSymbol,
+            attributes: project,
+            popupTemplate: {
+              title: "{title}",
+              content: "{description}<br><a href='{link}' target='_blank'>Learn more</a>",
+            },
+          });
+
+          graphicsLayer.add(pointGraphic);
+        });
+
+        // Function to navigate to a specific project
+        function navigateToProject(index) {
+          const project = projects[index];
+          view.goTo({
+            target: {
+              latitude: project.coordinates[1],
+              longitude: project.coordinates[0],
+              z: 2000000,
+            },
+            tilt: 30,
+          });
+
+          view.popup.open({
+            location: {
+              latitude: project.coordinates[1],
+              longitude: project.coordinates[0],
+            },
+            title: project.title,
+            content: `${project.description}<br><a href='${project.link}' target='_blank'>Learn more</a>`
+          });
+        }
+
+        // Start by showing the first project
+        view.when(() => {
+          navigateToProject(currentIndex);
+        });
+
+        // Add event listeners to the buttons
+        document.getElementById("prevButton").addEventListener("click", function () {
+          currentIndex = (currentIndex - 1 + projects.length) % projects.length;
+          navigateToProject(currentIndex);
+        });
+
+        document.getElementById("nextButton").addEventListener("click", function () {
+          currentIndex = (currentIndex + 1) % projects.length;
+          navigateToProject(currentIndex);
+        });
+      });
+    </script>
+  </body>
+</html>
