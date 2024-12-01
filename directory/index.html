@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>30 Day Maps Gallery</title>
+    <style>
+        /* Inline CSS */
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            text-align: center;
+        }
+
+        header {
+            padding: 20px;
+            background: #333;
+            color: #fff;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .gallery-item {
+            text-decoration: none;
+            color: #333;
+            transition: transform 0.2s;
+            width: 250px;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+
+        .item {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .item h2 {
+            margin: 0;
+            font-size: 1.4em;
+            color: #333;
+        }
+
+        .item p {
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        footer {
+            margin-top: 40px;
+            padding: 10px;
+            background: #333;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>30 Day Maps Challenge Gallery</h1>
+        <p>Explore each day’s map of the 30-day challenge!</p>
+    </header>
+    <main>
+        <div class="gallery" id="gallery"></div>
+    </main>
+    <footer>
+        <p>&copy; 2024 Paul Gibbs. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Inline JavaScript
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const gallery = document.getElementById('gallery');
+
+            const sites = [
+                { day: "Day 1", url: "https://www.linkedin.com/embed/feed/update/urn:li:share:7258227834190471168", title: "Google Timeline Points Map", description: "A visualization of Google Timeline data since 2019, formatted to GeoJSON using a custom Python script. A great start to an iterative exploration of personal location data." },
+                { day: "Day 2", url: "https://paulgibbs3rd.github.io/30DayMaps/day2/", title: "Points to Lines Journey Map", description: "Transitioning points into lines, this map displays routes between check-ins with a unique renderer using ArcGIS Pro. Transportation changes are also documented with Python and GeoJSON." },
+                { day: "Day 3", url: "https://paulgibbs3rd.github.io/30DayMaps/day3/", title: "Boundary Polygons Analysis", description: "Added city, county, and state boundaries to explore stats like 'most check-ins by city' and areas traveled without check-ins. Screenshots cover Southern California, the Bay Area, and Seattle." },
+                { day: "Day 4", url: "https://paulgibbs3rd.github.io/30DayMaps/day4/", title: "Hexagonal Binning of Google Timeline", description: "Hex-binning using John Nelson's hexagon layer to group location data into bins. An ArcPy script helps generate reusable hex-bin results." },
+                { day: "Day 5", url: "https://paulgibbs3rd.github.io/30DayMaps/day5/", title: "Moving from Southern California to Seattle", description: "Follow the journey from Southern California to Seattle, with an unexpected stopover in Petaluma, California. Life on the road is documented with heartfelt memories during the move." },
+                { day: "Day 6", url: "https://paulgibbs3rd.github.io/30DayMaps/day6/", title: "Precipitation Differences Between SoCal and Seattle", description: "Raster data comparing rainfall between SoCal and Seattle. See how the Puget Sound's climate contrasts sharply with the Inland Empire's dryness." },
+                { day: "Day 7", url: "https://paulgibbs3rd.github.io/30DayMaps/day7/", title: "GeoJSON with a Vintage Twist", description: "A sepia filter was applied to create a vintage-style web map of personal check-ins. Resting up after a dental procedure, keeping things simple today." },
+                { day: "Day 8", url: "https://paulgibbs3rd.github.io/30DayMaps/day8/", title: "Palestinian Healthcare Facilities", description: "Visualizing healthcare facilities across Palestine, sourced from the Humanitarian Data Exchange (HDX). This Leaflet app provides a view of facilities that serve people in difficult conditions." },
+                { day: "Day 9", url: "https://paulgibbs3rd.github.io/30DayMaps/day9/", title: "AI-driven 3D Scene of NYC", description: "Worked with ChatGPT to symbolize New York's buildings using a 3D Scene Layer. Created random breakpoints for building height and color assignments with an interactive legend." },
+                { day: "Day 10", url: "https://www.linkedin.com/embed/feed/update/urn:li:share:7263686273352048641", title: "Hand-Drawn Map from the Hospital", description: "A hand-drawn map provided by the hospital staff during my wife's tonsil removal. It helped navigate around the campus to pick her up—maps tell stories in everyday life." },
+                { day: "Day 11", url: "https://paulgibbs3rd.github.io/30DayMaps/day11/", title: "Historical Arctic Ice Extent", description: "Explore how the Arctic Ice is receding over time with data from NOAA, visualized in a web app." },
+                { day: "Day 12", url: "https://paulgibbs3rd.github.io/30DayMaps/day12/", title: "Miles Driven vs. Moon Distance", description: "Visualize how much of Earth has been traversed with your vehicle. Has my 250,000-mile Toyota Highlander reached the moon?" },
+                { day: "Day 13", url: "https://www.linkedin.com/posts/paullgibbs_30daymapchallenge-gis-iosdev-activity-7264169305833902081-YdYj?utm_source=share&utm_medium=member_desktop", title: "ArcGIS Maps SDK for Flutter", description: "Installed and set up the ArcGIS Maps SDK for Flutter on Mac and iPhone, excited to build iOS mapping applications!" },
+                { day: "Day 14", url: "https://paulgibbs3rd.github.io/30DayMaps/day14/", title: "ACRONYM Stockists Map", description: "A world map showing the locations of stores that carry ACRONYM GmbH. Fashion, technology, and mapping all united in one project." },
+                { day: "Day 15", url: "https://www.linkedin.com/embed/feed/update/urn:li:share:7264519191724990464", title: "Geocode Custom Stores", description: "A quick entry using ArcPy to geocode store locations. Used my previous project data of fashion stockists for this one." },
+                { day: "Day 16", url: "https://paulgibbs3rd.github.io/30DayMaps/day16/", title: "Breweries and Distilleries in the US", description: "Choropleth map visualizing how many breweries and distilleries are in each state. A fun and colorful dive into alcohol distribution across the US." },
+                // ... other days go here ...
+                { day: "Day 28", url: "https://www.linkedin.com/posts/paullgibbs_30daymapchallenge-blueplanet-aquarium-activity-7268686904257069056-k-IR?utm_source=share&utm_medium=member_desktop", title: "Maps at Seattle Aquarium", description: "A visit to the Seattle Aquarium featuring conservation maps like mangrove distribution, whale migration routes, and coral. Beautiful maps, beautiful animals." },
+                { day: "Day 29", url: "https://paulgibbs3rd.github.io/30DayMaps/day29/", title: "Building Density of Rome", description: "Using Overture Maps data to visualize building density in Rome, complete with cluster toggling for a quick glance at urban distribution." }
+            ];
+
+            sites.forEach(site => {
+                const galleryItem = document.createElement('a');
+                galleryItem.href = site.url;
+                galleryItem.target = '_blank';
+                galleryItem.rel = 'noopener noreferrer';
+                galleryItem.className = 'gallery-item';
+
+                galleryItem.innerHTML = `
+                    <div class="item">
+                        <h2>${site.day}: ${site.title}</h2>
+                        <p>${site.description}</p>
+                    </div>
+                `;
+
+                gallery.appendChild(galleryItem);
+            });
+        });
+    </script>
+</body>
+
+</html>
